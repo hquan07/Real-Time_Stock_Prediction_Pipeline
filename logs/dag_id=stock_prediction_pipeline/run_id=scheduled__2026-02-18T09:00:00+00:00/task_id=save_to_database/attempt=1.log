@@ -1,0 +1,24 @@
+[2026-02-19T10:04:29.338+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-02-19T10:04:29.403+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: stock_prediction_pipeline.save_to_database scheduled__2026-02-18T09:00:00+00:00 [queued]>
+[2026-02-19T10:04:29.421+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: stock_prediction_pipeline.save_to_database scheduled__2026-02-18T09:00:00+00:00 [queued]>
+[2026-02-19T10:04:29.422+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 2
+[2026-02-19T10:04:29.450+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): save_to_database> on 2026-02-18 09:00:00+00:00
+[2026-02-19T10:04:29.459+0000] {standard_task_runner.py:64} INFO - Started process 220 to run task
+[2026-02-19T10:04:29.464+0000] {standard_task_runner.py:90} INFO - Running: ['airflow', 'tasks', 'run', 'stock_prediction_pipeline', 'save_to_database', 'scheduled__2026-02-18T09:00:00+00:00', '--job-id', '129', '--raw', '--subdir', 'DAGS_FOLDER/stock_prediction_dag.py', '--cfg-path', '/tmp/tmp2540fm9x']
+[2026-02-19T10:04:29.468+0000] {standard_task_runner.py:91} INFO - Job 129: Subtask save_to_database
+[2026-02-19T10:04:29.581+0000] {task_command.py:426} INFO - Running <TaskInstance: stock_prediction_pipeline.save_to_database scheduled__2026-02-18T09:00:00+00:00 [running]> on host 30664b90b963
+[2026-02-19T10:04:29.798+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='stock_prediction_pipeline' AIRFLOW_CTX_TASK_ID='save_to_database' AIRFLOW_CTX_EXECUTION_DATE='2026-02-18T09:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-18T09:00:00+00:00'
+[2026-02-19T10:04:29.800+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-02-19T10:04:29.866+0000] {logging_mixin.py:188} INFO - Saving to database...
+[2026-02-19T10:04:29.867+0000] {logging_mixin.py:188} INFO -   - AAPL: $264.35 (21 records)
+[2026-02-19T10:04:29.867+0000] {logging_mixin.py:188} INFO -   - GOOGL: $303.33 (21 records)
+[2026-02-19T10:04:29.868+0000] {logging_mixin.py:188} INFO -   - MSFT: $399.60 (21 records)
+[2026-02-19T10:04:29.869+0000] {logging_mixin.py:188} INFO -   - AMZN: $204.79 (21 records)
+[2026-02-19T10:04:29.869+0000] {logging_mixin.py:188} INFO -   - TSLA: $411.32 (21 records)
+[2026-02-19T10:04:29.870+0000] {logging_mixin.py:188} INFO - Data saved successfully!
+[2026-02-19T10:04:29.871+0000] {python.py:237} INFO - Done. Returned value was: True
+[2026-02-19T10:04:29.872+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-02-19T10:04:29.914+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=stock_prediction_pipeline, task_id=save_to_database, run_id=scheduled__2026-02-18T09:00:00+00:00, execution_date=20260218T090000, start_date=20260219T100429, end_date=20260219T100429
+[2026-02-19T10:04:29.960+0000] {local_task_job_runner.py:243} INFO - Task exited with return code 0
+[2026-02-19T10:04:30.015+0000] {taskinstance.py:3503} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-19T10:04:30.017+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

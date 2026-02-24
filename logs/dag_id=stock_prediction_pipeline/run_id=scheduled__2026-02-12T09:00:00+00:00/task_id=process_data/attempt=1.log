@@ -1,0 +1,18 @@
+[2026-02-13T09:14:59.828+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-02-13T09:14:59.850+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: stock_prediction_pipeline.process_data scheduled__2026-02-12T09:00:00+00:00 [queued]>
+[2026-02-13T09:14:59.856+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: stock_prediction_pipeline.process_data scheduled__2026-02-12T09:00:00+00:00 [queued]>
+[2026-02-13T09:14:59.856+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 2
+[2026-02-13T09:14:59.865+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): process_data> on 2026-02-12 09:00:00+00:00
+[2026-02-13T09:14:59.868+0000] {standard_task_runner.py:64} INFO - Started process 218 to run task
+[2026-02-13T09:14:59.871+0000] {standard_task_runner.py:90} INFO - Running: ['airflow', 'tasks', 'run', 'stock_prediction_pipeline', 'process_data', 'scheduled__2026-02-12T09:00:00+00:00', '--job-id', '111', '--raw', '--subdir', 'DAGS_FOLDER/stock_prediction_dag.py', '--cfg-path', '/tmp/tmpt75wfh_8']
+[2026-02-13T09:14:59.872+0000] {standard_task_runner.py:91} INFO - Job 111: Subtask process_data
+[2026-02-13T09:14:59.913+0000] {task_command.py:426} INFO - Running <TaskInstance: stock_prediction_pipeline.process_data scheduled__2026-02-12T09:00:00+00:00 [running]> on host 30664b90b963
+[2026-02-13T09:14:59.989+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='stock_prediction_pipeline' AIRFLOW_CTX_TASK_ID='process_data' AIRFLOW_CTX_EXECUTION_DATE='2026-02-12T09:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-12T09:00:00+00:00'
+[2026-02-13T09:14:59.989+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-02-13T09:15:00.008+0000] {logging_mixin.py:188} INFO - Processed data for 5 symbols
+[2026-02-13T09:15:00.008+0000] {python.py:237} INFO - Done. Returned value was: {'AAPL': {'status': 'success', 'latest_close': 261.7300109863281, 'records': 21}, 'GOOGL': {'status': 'success', 'latest_close': 309.0, 'records': 21}, 'MSFT': {'status': 'success', 'latest_close': 401.8399963378906, 'records': 21}, 'AMZN': {'status': 'success', 'latest_close': 199.60000610351562, 'records': 21}, 'TSLA': {'status': 'success', 'latest_close': 417.07000732421875, 'records': 21}}
+[2026-02-13T09:15:00.008+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-02-13T09:15:00.028+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=stock_prediction_pipeline, task_id=process_data, run_id=scheduled__2026-02-12T09:00:00+00:00, execution_date=20260212T090000, start_date=20260213T091459, end_date=20260213T091500
+[2026-02-13T09:15:00.042+0000] {local_task_job_runner.py:243} INFO - Task exited with return code 0
+[2026-02-13T09:15:00.064+0000] {taskinstance.py:3503} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-13T09:15:00.065+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

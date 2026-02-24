@@ -1,0 +1,57 @@
+# -------------------------
+# Core Data Processing
+pandas==2.2.2
+numpy==2.2.6
+yfinance==0.2.66
+
+# -------------------------
+# Kafka
+confluent-kafka==2.12.2
+kafka-python==2.3.0
+
+# -------------------------
+# Spark
+pyspark==3.5.3
+
+# -------------------------
+# PostgreSQL + ORM
+psycopg2-binary==2.9.11
+SQLAlchemy==1.4.54
+alembic==1.17.2
+
+# -------------------------
+# Machine Learning
+scikit-learn==1.7.2
+joblib==1.5.2
+
+# -------------------------
+# API / Serialization Utilities
+pyyaml==6.0.3
+python-dotenv==1.2.1
+
+# -------------------------
+# Dashboard
+dash==3.3.0
+plotly==6.5.0
+
+# -------------------------
+# Logging + Utils
+loguru==0.7.3
+
+# -------------------------
+# Airflow
+apache-airflow
+apache-airflow-providers-postgres
+apache-airflow-providers-apache-spark
+apache-airflow-providers-apache-kafka
+apache-airflow-providers-docker
+
+# -------------------------
+# Testing
+pytest==8.3.1
+pytest-cov==4.1.0
+pytest-mock==3.14.0
+
+# -------------------------
+aiohttp==3.13.2
+fastavro==1.9.4

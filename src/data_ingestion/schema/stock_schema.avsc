@@ -1,0 +1,86 @@
+{
+  "type": "record",
+  "name": "StockRawData",
+  "namespace": "com.stock.ingestion",
+
+  "fields": [
+    {
+      "name": "ticker",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "doc": "Event timestamp in milliseconds"
+    },
+
+    {
+      "name": "price",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "Price",
+          "fields": [
+            { "name": "open", "type": "double" },
+            { "name": "high", "type": "double" },
+            { "name": "low", "type": "double" },
+            { "name": "close", "type": "double" },
+            { "name": "volume", "type": "long" }
+          ]
+        }
+      ],
+      "default": null
+    },
+
+    {
+      "name": "dividends",
+      "type": ["null", "double"],
+      "default": null
+    },
+
+    {
+      "name": "splits",
+      "type": ["null", "double"],
+      "default": null
+    },
+
+    {
+      "name": "earnings",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "Earnings",
+          "fields": [
+            { "name": "eps_actual", "type": "double" },
+            { "name": "eps_estimate", "type": "double" },
+            {
+              "name": "quarter",
+              "type": ["null", "string"],
+              "default": null
+            }
+          ]
+        }
+      ],
+      "default": null
+    },
+
+    {
+      "name": "financials",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "Financials",
+          "fields": [
+            { "name": "total_revenue", "type": "long" },
+            { "name": "net_income", "type": "long" },
+            { "name": "operating_income", "type": "long" }
+          ]
+        }
+      ],
+      "default": null
+    }
+  ]
+}

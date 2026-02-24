@@ -1,0 +1,32 @@
+nohup: ignoring input
+2026-02-03 22:40:20.444 | INFO     | __main__:run_data_ingestion:15 - 🚀 Starting data ingestion pipeline...
+2026-02-03 22:40:20,445 | INFO | data_ingestion.fetcher.tickers | Using 10 default tickers
+2026-02-03 22:40:20,445 | INFO | data_ingestion | 🚀 Starting ingestion pipeline for 10 tickers
+2026-02-03 22:40:20,445 | INFO | data_ingestion | ➡ Fetching data for AAPL
+2026-02-03 22:40:24,444 | INFO | kafka.conn | <BrokerConnection client_id=yfinance-producer, node_id=bootstrap-0 host=localhost:9092 <connecting> [IPv4 ('127.0.0.1', 9092)]>: connecting to localhost:9092 [('127.0.0.1', 9092) IPv4]
+2026-02-03 22:40:24,451 | INFO | kafka.conn | <BrokerConnection client_id=yfinance-producer, node_id=bootstrap-0 host=localhost:9092 <checking_api_versions_recv> [IPv4 ('127.0.0.1', 9092)]>: Broker version identified as 2.6
+2026-02-03 22:40:24,452 | INFO | kafka.conn | <BrokerConnection client_id=yfinance-producer, node_id=bootstrap-0 host=localhost:9092 <connected> [IPv4 ('127.0.0.1', 9092)]>: Connection complete.
+2026-02-03 22:40:24,559 | INFO | kafka.conn | <BrokerConnection client_id=yfinance-producer, node_id=1 host=localhost:9092 <connecting> [IPv4 ('127.0.0.1', 9092)]>: connecting to localhost:9092 [('127.0.0.1', 9092) IPv4]
+2026-02-03 22:40:24,559 | INFO | kafka.conn | <BrokerConnection client_id=yfinance-producer, node_id=1 host=localhost:9092 <connected> [IPv4 ('127.0.0.1', 9092)]>: Connection complete.
+2026-02-03 22:40:24,559 | INFO | kafka.conn | <BrokerConnection client_id=yfinance-producer, node_id=bootstrap-0 host=localhost:9092 <connected> [IPv4 ('127.0.0.1', 9092)]>: Closing connection. 
+2026-02-03 22:40:24,600 | INFO | data_ingestion | ✔ Sent data for AAPL
+2026-02-03 22:40:25,100 | INFO | data_ingestion | ➡ Fetching data for GOOGL
+2026-02-03 22:40:27,709 | INFO | data_ingestion | ✔ Sent data for GOOGL
+2026-02-03 22:40:28,209 | INFO | data_ingestion | ➡ Fetching data for MSFT
+2026-02-03 22:40:30,706 | INFO | data_ingestion | ✔ Sent data for MSFT
+2026-02-03 22:40:31,206 | INFO | data_ingestion | ➡ Fetching data for AMZN
+2026-02-03 22:40:33,638 | INFO | data_ingestion | ✔ Sent data for AMZN
+2026-02-03 22:40:34,138 | INFO | data_ingestion | ➡ Fetching data for META
+2026-02-03 22:40:36,224 | INFO | data_ingestion | ✔ Sent data for META
+2026-02-03 22:40:36,724 | INFO | data_ingestion | ➡ Fetching data for NVDA
+2026-02-03 22:40:39,100 | INFO | data_ingestion | ✔ Sent data for NVDA
+2026-02-03 22:40:39,601 | INFO | data_ingestion | ➡ Fetching data for TSLA
+2026-02-03 22:40:41,822 | INFO | data_ingestion | ✔ Sent data for TSLA
+2026-02-03 22:40:42,322 | INFO | data_ingestion | ➡ Fetching data for JPM
+2026-02-03 22:40:46,412 | INFO | data_ingestion | ✔ Sent data for JPM
+2026-02-03 22:40:46,912 | INFO | data_ingestion | ➡ Fetching data for V
+2026-02-03 22:40:49,335 | INFO | data_ingestion | ✔ Sent data for V
+2026-02-03 22:40:49,836 | INFO | data_ingestion | ➡ Fetching data for WMT
+2026-02-03 22:40:52,617 | INFO | data_ingestion | ✔ Sent data for WMT
+2026-02-03 22:40:53,117 | INFO | data_ingestion | ✅ Data ingestion pipeline completed
+2026-02-03 22:40:53,118 | INFO | kafka.conn | <BrokerConnection client_id=yfinance-producer, node_id=1 host=localhost:9092 <connected> [IPv4 ('127.0.0.1', 9092)]>: Closing connection. 

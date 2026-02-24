@@ -1,0 +1,71 @@
+nohup: ignoring input
+2026-02-03 22:40:20.186 | INFO     | __main__:run_spark_consumer:47 - 🚀 Starting Spark consumer...
+2026-02-03 22:40:20.191 | ERROR    | __main__:main:135 - 🔥 Error: [Errno 2] No such file or directory: '/home/hquan07/spark/./bin/spark-submit'
+Traceback (most recent call last):
+
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/main.py", line 140, in <module>
+    main()
+    └ <function main at 0x7a7e10d96f20>
+
+> File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/main.py", line 130, in main
+    args.func(args)
+    │    │    └ Namespace(command='spark', func=<function run_spark_consumer at 0x7a7e10d96de0>)
+    │    └ <function run_spark_consumer at 0x7a7e10d96de0>
+    └ Namespace(command='spark', func=<function run_spark_consumer at 0x7a7e10d96de0>)
+
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/main.py", line 48, in run_spark_consumer
+    run_consumer()
+    └ <function run_consumer at 0x7a7de3c362a0>
+
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/streaming/jobs/spark_consumer_job.py", line 109, in run_consumer
+    spark = create_spark_session()
+            └ <function create_spark_session at 0x7a7e10d97e20>
+
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/streaming/jobs/spark_consumer_job.py", line 41, in create_spark_session
+    .getOrCreate()
+
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pyspark/sql/session.py", line 557, in getOrCreate
+    sc = SparkContext.getOrCreate(sparkConf)
+         │            │           └ <pyspark.conf.SparkConf object at 0x7a7e10fb97f0>
+         │            └ <classmethod(<function SparkContext.getOrCreate at 0x7a7e0dd33560>)>
+         └ <class 'pyspark.core.context.SparkContext'>
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pyspark/core/context.py", line 542, in getOrCreate
+    SparkContext(conf=conf or SparkConf())
+    │                 │       └ <class 'pyspark.conf.SparkConf'>
+    │                 └ <pyspark.conf.SparkConf object at 0x7a7e10fb97f0>
+    └ <class 'pyspark.core.context.SparkContext'>
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pyspark/core/context.py", line 206, in __init__
+    SparkContext._ensure_initialized(self, gateway=gateway, conf=conf)
+    │            │                   │             │             └ <pyspark.conf.SparkConf object at 0x7a7e10fb97f0>
+    │            │                   │             └ None
+    │            │                   └ <unprintable SparkContext object>
+    │            └ <classmethod(<function SparkContext._ensure_initialized at 0x7a7e0dd332e0>)>
+    └ <class 'pyspark.core.context.SparkContext'>
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pyspark/core/context.py", line 463, in _ensure_initialized
+    SparkContext._gateway = gateway or launch_gateway(conf)
+    │            │          │          │              └ <pyspark.conf.SparkConf object at 0x7a7e10fb97f0>
+    │            │          │          └ <function launch_gateway at 0x7a7e0dd30b80>
+    │            │          └ None
+    │            └ None
+    └ <class 'pyspark.core.context.SparkContext'>
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pyspark/java_gateway.py", line 101, in launch_gateway
+    proc = Popen(command, **popen_kwargs)
+           │     │          └ {'stdin': -1, 'env': {'SHELL': '/bin/bash', 'SESSION_MANAGER': 'local/hquan07:@/tmp/.ICE-unix/3731,unix/hquan07:/tmp/.ICE-uni...
+           │     └ ['/home/hquan07/spark/./bin/spark-submit', '--conf', 'spark.app.name=KafkaSparkConsumer', '--conf', 'spark.jars.packages=org....
+           └ <class 'subprocess.Popen'>
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    │    │              │     │           │           └ True
+    │    │              │     │           └ <function launch_gateway.<locals>.preexec_func at 0x7a7e10d97ce0>
+    │    │              │     └ None
+    │    │              └ ['/home/hquan07/spark/./bin/spark-submit', '--conf', 'spark.app.name=KafkaSparkConsumer', '--conf', 'spark.jars.packages=org....
+    │    └ <function Popen._execute_child at 0x7a7e11717e20>
+    └ <Popen: returncode: 255 args: ['/home/hquan07/spark/./bin/spark-submit', '--...>
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+          │                    │          │        └ '/home/hquan07/spark/./bin/spark-submit'
+          │                    │          └ 'No such file or directory'
+          │                    └ 2
+          └ <class 'OSError'>
+
+FileNotFoundError: [Errno 2] No such file or directory: '/home/hquan07/spark/./bin/spark-submit'

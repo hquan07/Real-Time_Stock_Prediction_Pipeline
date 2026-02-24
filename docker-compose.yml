@@ -1,0 +1,191 @@
+version: "3.9"
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.9.3-python3.10
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+    AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW__CORE__LOAD_EXAMPLES}
+    AIRFLOW__WEBSERVER__RBAC: ${AIRFLOW__WEBSERVER__RBAC}
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+    AIRFLOW_HOME: /opt/airflow
+    _AIRFLOW_DB_MIGRATE: 'true'
+    _AIRFLOW_WWW_USER_CREATE: 'true'
+    _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER:-airflow}
+    _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-airflow}
+    _PIP_ADDITIONAL_REQUIREMENTS: "yfinance>=0.2.0 pandas>=2.0.0 loguru>=0.7.0"
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  # ---------------------------
+  # POSTGRES FOR AIRFLOW
+  # ---------------------------
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}" ]
+      interval: 5s
+      retries: 5
+    restart: always
+
+  # ---------------------------
+  # AIRFLOW INIT (runs once to init DB and create user)
+  # ---------------------------
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username $${_AIRFLOW_WWW_USER_USERNAME} \
+          --password $${_AIRFLOW_WWW_USER_PASSWORD} \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com || true
+        echo "Airflow init completed successfully!"
+    restart: "no"
+
+  # ---------------------------
+  # AIRFLOW WEBSERVER
+  # ---------------------------
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    ports:
+      - "8081:8080"
+    command: webserver
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+  # ---------------------------
+  # AIRFLOW SCHEDULER
+  # ---------------------------
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    command: scheduler
+    restart: always
+
+  # ---------------------------
+  # KAFKA + ZOOKEEPER
+  # ---------------------------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT}
+    ports:
+      - "2181:2181"
+    restart: always
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID}
+      KAFKA_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
+      # Multiple listeners for internal (Docker) and external (host) connections
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    restart: always
+
+  # ---------------------------
+  # SPARK (MASTER + WORKER)
+  # ---------------------------
+  spark-master:
+    build:
+      context: ./docker/spark
+      dockerfile: Dockerfile
+    container_name: spark-master
+    environment:
+      SPARK_MASTER_HOST: ${SPARK_MASTER_HOST}
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    command: [ "/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master" ]
+    volumes:
+      - ./data:/opt/data
+      - ./models:/opt/models
+      - ./src:/opt/app/src
+    restart: always
+
+  spark-worker:
+    build:
+      context: ./docker/spark
+      dockerfile: Dockerfile
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MASTER: spark://spark-master:7077
+    ports:
+      - "8082:8081"
+    command: [ "/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077" ]
+    volumes:
+      - ./data:/opt/data
+      - ./models:/opt/models
+      - ./src:/opt/app/src
+    restart: always
+
+  # ---------------------------
+  # JUPYTER NOTEBOOK FOR ML + DL
+  # ---------------------------
+  jupyter:
+    image: quay.io/jupyter/pytorch-notebook:latest
+    container_name: jupyter
+    environment:
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN}
+    ports:
+      - "${JUPYTER_PORT}:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/notebooks
+      - ./data:/home/jovyan/data
+      - ./models:/home/jovyan/models
+    restart: always
+
+# ---------------------------
+# VOLUMES
+# ---------------------------
+volumes:
+  postgres_data:
+  kafka_data:

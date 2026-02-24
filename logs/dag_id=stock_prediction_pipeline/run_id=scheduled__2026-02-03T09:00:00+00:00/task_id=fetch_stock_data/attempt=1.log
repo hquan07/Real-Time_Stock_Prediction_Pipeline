@@ -1,0 +1,22 @@
+[2026-02-05T06:23:44.742+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-02-05T06:23:44.780+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: stock_prediction_pipeline.fetch_stock_data scheduled__2026-02-03T09:00:00+00:00 [queued]>
+[2026-02-05T06:23:44.789+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: stock_prediction_pipeline.fetch_stock_data scheduled__2026-02-03T09:00:00+00:00 [queued]>
+[2026-02-05T06:23:44.790+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 2
+[2026-02-05T06:23:44.804+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): fetch_stock_data> on 2026-02-03 09:00:00+00:00
+[2026-02-05T06:23:44.809+0000] {standard_task_runner.py:64} INFO - Started process 213 to run task
+[2026-02-05T06:23:44.813+0000] {standard_task_runner.py:90} INFO - Running: ['airflow', 'tasks', 'run', 'stock_prediction_pipeline', 'fetch_stock_data', 'scheduled__2026-02-03T09:00:00+00:00', '--job-id', '65', '--raw', '--subdir', 'DAGS_FOLDER/stock_prediction_dag.py', '--cfg-path', '/tmp/tmphf4v13xs']
+[2026-02-05T06:23:44.814+0000] {standard_task_runner.py:91} INFO - Job 65: Subtask fetch_stock_data
+[2026-02-05T06:23:44.878+0000] {task_command.py:426} INFO - Running <TaskInstance: stock_prediction_pipeline.fetch_stock_data scheduled__2026-02-03T09:00:00+00:00 [running]> on host 30664b90b963
+[2026-02-05T06:23:44.988+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='stock_prediction_pipeline' AIRFLOW_CTX_TASK_ID='fetch_stock_data' AIRFLOW_CTX_EXECUTION_DATE='2026-02-03T09:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-03T09:00:00+00:00'
+[2026-02-05T06:23:44.989+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-02-05T06:23:57.156+0000] {logging_mixin.py:188} INFO - Fetched 21 records for AAPL
+[2026-02-05T06:23:57.258+0000] {logging_mixin.py:188} INFO - Fetched 21 records for GOOGL
+[2026-02-05T06:23:57.400+0000] {logging_mixin.py:188} INFO - Fetched 21 records for MSFT
+[2026-02-05T06:23:57.503+0000] {logging_mixin.py:188} INFO - Fetched 21 records for AMZN
+[2026-02-05T06:23:57.665+0000] {logging_mixin.py:188} INFO - Fetched 21 records for TSLA
+[2026-02-05T06:23:57.665+0000] {python.py:237} INFO - Done. Returned value was: {'AAPL': {'latest_close': 276.489990234375, 'records': 21}, 'GOOGL': {'latest_close': 333.0400085449219, 'records': 21}, 'MSFT': {'latest_close': 414.19000244140625, 'records': 21}, 'AMZN': {'latest_close': 232.99000549316406, 'records': 21}, 'TSLA': {'latest_close': 406.010009765625, 'records': 21}}
+[2026-02-05T06:23:57.666+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-02-05T06:23:57.696+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=stock_prediction_pipeline, task_id=fetch_stock_data, run_id=scheduled__2026-02-03T09:00:00+00:00, execution_date=20260203T090000, start_date=20260205T062344, end_date=20260205T062357
+[2026-02-05T06:23:57.731+0000] {local_task_job_runner.py:243} INFO - Task exited with return code 0
+[2026-02-05T06:23:57.764+0000] {taskinstance.py:3503} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-05T06:23:57.766+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

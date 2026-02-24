@@ -1,0 +1,56 @@
+{
+  "type": "record",
+  "name": "StockPrice",
+  "namespace": "com.yourcompany.streaming",
+
+  "fields": [
+    {
+      "name": "ticker",
+      "type": "string",
+      "doc": "Stock ticker symbol"
+    },
+    {
+      "name": "event_time",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Market event time in UTC"
+    },
+    {
+      "name": "open",
+      "type": ["null", "double"],
+      "default": null
+    },
+    {
+      "name": "high",
+      "type": ["null", "double"],
+      "default": null
+    },
+    {
+      "name": "low",
+      "type": ["null", "double"],
+      "default": null
+    },
+    {
+      "name": "close",
+      "type": ["null", "double"],
+      "default": null
+    },
+    {
+      "name": "volume",
+      "type": ["null", "long"],
+      "default": null
+    },
+    {
+      "name": "interval",
+      "type": "string",
+      "doc": "Data interval (1m, 5m, 1h, 1d)"
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "default": "yfinance"
+    }
+  ]
+}

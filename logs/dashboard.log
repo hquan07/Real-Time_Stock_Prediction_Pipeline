@@ -1,0 +1,1435 @@
+nohup: ignoring input
+2026-02-09 00:54:14.470 | INFO     | __main__:run_dashboard:22 - 🚀 Starting dashboard on port 8050...
+2026-02-09 00:54:14.470 | INFO     | dashboard.app:run_dashboard:58 - 🚀 Starting dashboard on http://0.0.0.0:8050
+Dash is running on http://0.0.0.0:8050/
+
+ * Serving Flask app 'dashboard.app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8050
+ * Running on http://192.168.1.9:8050
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [09/Feb/2026 00:54:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 00:54:16.927 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 00:54:16] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 00:54:16,946] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 00:54:17] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:54] "[36mGET /assets/custom.css?m=1770572930.9337397 HTTP/1.1[0m" 304 -
+127.0.0.1 - - [09/Feb/2026 00:54:54] "GET /_dash-layout HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:54] "GET /_dash-dependencies HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 00:54:55.247 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 00:54:55,434] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 00:54:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "GET /_favicon.ico?v=3.4.0 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:54:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 00:55:55.233 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 00:55:55,249] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 00:55:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:55:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 00:56:55.231 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 00:56:55,251] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 00:56:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:56:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 00:57:55.226 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 00:57:55,272] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 00:57:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:57:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 00:58:55.230 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 00:58:55,247] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 00:58:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:58:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 00:59:55.241 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 00:59:55,267] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 00:59:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 00:59:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 01:00:55.232 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 01:00:55,255] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 01:00:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:00:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:07] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:26] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:27] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:28] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:31] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:38] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:39] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:41] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:53] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py:65: UserWarning:
+
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+2026-02-09 01:01:55.226 | INFO     | dashboard.callbacks:fetch_stock_data:69 - 📊 Loaded 55 records for AAPL
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+[2026-02-09 01:01:55,250] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_get_app.py", line 17, in wrap
+    return ctx.run(func, self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/dash.py", line 1600, in dispatch
+    response_data = ctx.run(partial_func)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 720, in add_context
+    raise err
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 711, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/dash/_callback.py", line 58, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 350, in update_sparklines
+    price_bars = create_sparkline_bars(df["close"], COLORS["primary"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/src/dashboard/callbacks.py", line 305, in create_sparkline_bars
+    if not data or len(data) < bar_count:
+           ^^^^
+  File "/home/hquan07/Real-Time_Stock_Prediction_Pipeline/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1513, in __bool__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+127.0.0.1 - - [09/Feb/2026 01:01:55] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:01:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:01] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [09/Feb/2026 01:02:03] "POST /_dash-update-component HTTP/1.1" 200 -

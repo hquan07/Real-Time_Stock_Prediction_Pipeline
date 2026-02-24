@@ -1,0 +1,9 @@
+# Minimal requirements for Airflow DAGs
+# Base image already has apache-airflow installed
+
+# Data fetching
+yfinance>=0.2.0
+pandas>=2.0.0
+
+# Logging
+loguru>=0.7.0

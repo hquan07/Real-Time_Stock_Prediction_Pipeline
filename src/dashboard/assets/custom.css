@@ -1,0 +1,560 @@
+/* Premium Header Styles */
+
+.premium-header {
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%);
+    position: relative;
+}
+
+/* Animated gradient background */
+.header-gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            rgba(99, 102, 241, 0) 0%,
+            rgba(99, 102, 241, 0.1) 25%,
+            rgba(139, 92, 246, 0.15) 50%,
+            rgba(99, 102, 241, 0.1) 75%,
+            rgba(99, 102, 241, 0) 100%);
+    background-size: 200% 100%;
+    animation: gradientMove 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes gradientMove {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Market Status LED */
+.market-led {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #94a3b8;
+    box-shadow: 0 0 8px rgba(148, 163, 184, 0.5);
+    transition: all 0.3s ease;
+}
+
+.market-led.open {
+    background-color: #10b981;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+    animation: pulse-green 2s ease-in-out infinite;
+}
+
+.market-led.closed {
+    background-color: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes pulse-green {
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
+    }
+}
+
+/* Title Glow Effect */
+.title-glow {
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    background: linear-gradient(135deg, #fff 0%, #c4b5fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    transition: all 0.2s ease !important;
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: rotate(15deg);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* Dark theme for dropdown menus */
+.Select-menu-outer {
+    background-color: #1a1a2e !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+.Select-option {
+    background-color: #1a1a2e !important;
+    color: #fff !important;
+    padding: 10px 12px !important;
+}
+
+.Select-option:hover,
+.Select-option.is-focused {
+    background-color: #6366f1 !important;
+    color: #fff !important;
+}
+
+.Select-option.is-selected {
+    background-color: #4f46e5 !important;
+    color: #fff !important;
+}
+
+/* Dropdown control */
+.Select-control {
+    background-color: #0f0f1a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+}
+
+.Select-value-label {
+    color: #fff !important;
+}
+
+.Select-placeholder {
+    color: #94a3b8 !important;
+}
+
+.Select-input input {
+    color: #fff !important;
+}
+
+/* Dropdown arrow */
+.Select-arrow-zone {
+    color: #94a3b8 !important;
+}
+
+/* Tabs Styling */
+.tab-container {
+    margin-bottom: 16px;
+}
+
+/* Tab list container */
+.custom-tabs {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Tab content area */
+.tab-content {
+    padding-top: 16px;
+}
+
+/* Radio items styling */
+.form-check-input:checked {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+
+/* Chart Type Toggle Buttons */
+.chart-type-toggle label {
+    transition: all 0.2s ease !important;
+}
+
+.chart-type-toggle label:hover {
+    background-color: rgba(99, 102, 241, 0.25) !important;
+    color: #fff !important;
+    border-color: rgba(99, 102, 241, 0.5) !important;
+}
+
+.chart-type-toggle input:checked+label {
+    background-color: #6366f1 !important;
+    color: #fff !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+}
+
+
+/* Scrollbar styling */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f0f1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8b5cf6;
+}
+
+/* Improved chart styling */
+
+.js-plotly-plot .plotly .modebar {
+    background-color: transparent !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn path {
+    fill: #94a3b8 !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn:hover path {
+    fill: #fff !important;
+}
+
+/* Animations */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tab-content>div {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Stat Cards Hover Effect */
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+
+    /* Adjust grid for smaller screens */
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ============================================= */
+/* Chart Enhancement Styles */
+/* ============================================= */
+
+/* Fullscreen mode for chart container */
+.chart-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    background: #0f0f1a !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+.chart-fullscreen .js-plotly-plot {
+    height: calc(100vh - 100px) !important;
+}
+
+/* Chart toolbar button styles */
+.chart-toolbar-btn {
+    transition: all 0.2s ease;
+}
+
+.chart-toolbar-btn:hover {
+    background: rgba(99, 102, 241, 0.4) !important;
+    transform: scale(1.05);
+}
+
+/* Plotly modebar custom styling */
+.modebar {
+    background: rgba(15, 15, 26, 0.9) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+}
+
+.modebar-btn {
+    color: #94a3b8 !important;
+}
+
+.modebar-btn:hover {
+    color: #6366f1 !important;
+}
+
+.modebar-btn.active {
+    color: #6366f1 !important;
+}
+
+/* ============================================= */
+/* Phase 2: Animations & Polish */
+/* ============================================= */
+
+/* Skeleton Loader Animation */
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba(26, 26, 46, 0.8) 0%,
+            rgba(50, 50, 80, 0.8) 50%,
+            rgba(26, 26, 46, 0.8) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+.skeleton-text {
+    height: 20px;
+    width: 80%;
+    margin-bottom: 8px;
+}
+
+.skeleton-chart {
+    height: 300px;
+    width: 100%;
+}
+
+.skeleton-card {
+    height: 80px;
+    width: 100%;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Smooth Tab Transitions */
+.tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Chart Container Transitions */
+.dash-graph {
+    transition: opacity 0.3s ease;
+}
+
+/* Stats Card Value Transitions */
+.stats-value {
+    transition: all 0.3s ease;
+}
+
+/* Refresh Indicator Animation */
+.refresh-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    margin-right: 6px;
+    animation: pulse-refresh 2s ease-in-out infinite;
+}
+
+@keyframes pulse-refresh {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 15, 26, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+}
+
+/* Spinner Animation */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(99, 102, 241, 0.3);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================= */
+/* Dropdown Fix - Z-Index */
+/* ============================================= */
+.Select-menu-outer,
+.VirtualizedSelectMenu,
+.dash-dropdown .Select-menu-outer {
+    z-index: 9999 !important;
+}
+
+.dash-dropdown {
+    position: relative;
+    z-index: 100;
+}
+
+/* Fix for model selector dropdown */
+#model-selector {
+    z-index: 1000 !important;
+}
+
+.Select.is-open {
+    z-index: 9999 !important;
+}
+
+/* ============================================= */
+/* Phase 4: Stats Cards Enhancement */
+/* ============================================= */
+
+/* Stats Card Hover Effect */
+.stats-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stats-card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.5);
+    background: rgba(30, 30, 55, 0.95) !important;
+}
+
+/* Sparkline Container */
+.sparkline-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+}
+
+.sparkline-container .bar {
+    background: currentColor;
+    border-radius: 2px 2px 0 0;
+    transition: height 0.3s ease;
+}
+
+/* Animated Counter Effect */
+.animated-counter {
+    transition: all 0.4s ease-out;
+}
+
+/* Value change flash effect */
+.value-up {
+    animation: flashGreen 0.5s ease;
+}
+
+.value-down {
+    animation: flashRed 0.5s ease;
+}
+
+@keyframes flashGreen {
+    0% {
+        background-color: rgba(16, 185, 129, 0.3);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes flashRed {
+    0% {
+        background-color: rgba(239, 68, 68, 0.3);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* ============================================= */
+/* Phase 5: Watchlist Panel Styles */
+/* ============================================= */
+
+/* Watchlist Item Hover */
+.watchlist-item:hover {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+/* Favorite Star Active */
+.favorite-star.active,
+.favorite-star:hover {
+    opacity: 1 !important;
+}
+
+/* Custom Scrollbar for Watchlist */
+#watchlist-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+#watchlist-body::-webkit-scrollbar-track {
+    background: rgba(15, 15, 26, 0.5);
+    border-radius: 4px;
+}
+
+#watchlist-body::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.4);
+    border-radius: 4px;
+}
+
+#watchlist-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6);
+}
+
+/* Search Input Focus */
+#watchlist-search:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
