@@ -83,7 +83,7 @@ Create a `.env` file in the root directory:
 ```env
 # PostgreSQL
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=Huyquan1607
+POSTGRES_PASSWORD=your_password
 POSTGRES_DB=stockdb
 POSTGRES_PORT=5432
 
