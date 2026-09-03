@@ -99,7 +99,7 @@ SPARK_MASTER_HOST=spark-master
 # Airflow
 AIRFLOW__CORE__EXECUTOR=LocalExecutor
 AIRFLOW__CORE__LOAD_EXAMPLES=false
-AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://postgres:Huyquan1607@postgres:5432/airflow
+AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://postgres:PG_PASSWORD@postgres:5432/airflow
 
 # Jupyter
 JUPYTER_TOKEN=your_token
