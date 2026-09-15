@@ -2,3 +2,4 @@
 pytest==8.3.1
 pytest-cov==4.1.0
 pytest-mock==3.14.0
+apache-airflow==2.9.3

@@ -3,4 +3,4 @@ pyspark==3.5.3
 scikit-learn==1.7.2
 joblib==1.5.2
 xgboost==2.0.3
-torch==2.1.2
+torch==2.4.0

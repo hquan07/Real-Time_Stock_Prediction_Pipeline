@@ -12,6 +12,9 @@ import pytest
 import pandas as pd
 import numpy as np
 
+# Unset SPARK_HOME so pyspark uses its bundled spark
+os.environ.pop("SPARK_HOME", None)
+
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 

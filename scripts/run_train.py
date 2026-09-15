@@ -6,6 +6,7 @@ Called by train_model_dag.py
 import sys
 import os
 from datetime import datetime
+import pandas as pd
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))

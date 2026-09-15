@@ -169,21 +169,16 @@ class TestCompareModels:
 class TestAirflowTrainScript:
     """Tests for Airflow training script."""
 
-    @patch("airflow.scripts.run_train.load_training_data")
-    @patch("airflow.scripts.run_train.generate_sample_training_data")
-    def test_run_train_with_sample_data(self, mock_sample, mock_load):
-        """Test training with sample data when no DB available."""
+    @patch("scripts.run_train.load_training_data")
+    def test_run_train_with_sample_data(self, mock_load, sample_price_data):
+        """Test training with sample data."""
         import sys
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
         
-        from airflow.scripts.run_train import run_train, generate_sample_training_data
-
-        # Mock empty DB load
-        mock_load.return_value = pd.DataFrame()
+        from scripts.run_train import run_train
 
         # Use real sample generation
-        sample_df = generate_sample_training_data(100)
-        mock_sample.return_value = sample_df
+        mock_load.return_value = sample_price_data
 
         result = run_train(model_type="random_forest", save_model=False)
 

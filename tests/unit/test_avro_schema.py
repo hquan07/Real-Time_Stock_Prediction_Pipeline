@@ -23,6 +23,8 @@ def test_message_matches_avro_schema(avro_schema):
     assert validate(message, avro_schema) is True
 
 
+from fastavro.validation import ValidationError
+
 def test_invalid_message_fails_schema(avro_schema):
     """Invalid message should not pass schema validation"""
 
@@ -31,4 +33,5 @@ def test_invalid_message_fails_schema(avro_schema):
         # missing required fields
     }
 
-    assert validate(invalid_message, avro_schema) is False
+    with pytest.raises(ValidationError):
+        validate(invalid_message, avro_schema)

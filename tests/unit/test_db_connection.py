@@ -12,11 +12,11 @@ class TestDBConnection:
     def test_database_url_construction(self):
         """Test that database URL is constructed correctly."""
         with patch.dict("os.environ", {
-            "DB_HOST": "testhost",
-            "DB_PORT": "5433",
-            "DB_NAME": "testdb",
-            "DB_USER": "testuser",
-            "DB_PASSWORD": "testpass",
+            "POSTGRES_HOST": "testhost",
+            "POSTGRES_PORT": "5433",
+            "POSTGRES_DB": "testdb",
+            "POSTGRES_USER": "testuser",
+            "POSTGRES_PASSWORD": "testpass",
         }):
             # Re-import to pick up new env vars
             import importlib
