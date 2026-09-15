@@ -19,10 +19,16 @@ def add_lag_features(df: pd.DataFrame, lags=[1, 5, 10]) -> pd.DataFrame:
     return df
 
 
+def add_target(df: pd.DataFrame) -> pd.DataFrame:
+    # We predict the next day's log return
+    df["target_return"] = df["log_return"].shift(-1)
+    return df
+
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df = add_return_features(df)
     df = add_rolling_features(df)
     df = add_lag_features(df)
+    df = add_target(df)
 
     df = df.dropna()
     return df
