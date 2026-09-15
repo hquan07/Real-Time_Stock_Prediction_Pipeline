@@ -42,7 +42,7 @@ class ModelLoader:
             Loaded model object.
         """
         if model_path is None:
-            model_path = os.path.join(MODEL_DIR, "model.pkl")
+            model_path = os.path.join(ARTIFACT_DIR, "rf_model_ALL_v1.pkl")
 
         if use_cache and model_path in cls._cache:
             logger.debug(f"Using cached model from {model_path}")

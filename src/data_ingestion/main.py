@@ -47,11 +47,11 @@ def build_stock_message(ticker: str) -> Dict[str, Any]:
             "timestamp": int(time.time() * 1000),
 
             "price": {
-                "open": float(price.get("Open", 0)),
-                "high": float(price.get("High", 0)),
-                "low": float(price.get("Low", 0)),
-                "close": float(price.get("Close", 0)),
-                "volume": int(price.get("Volume", 0))
+                "open": float(price.get("open", 0)),
+                "high": float(price.get("high", 0)),
+                "low": float(price.get("low", 0)),
+                "close": float(price.get("close", 0)),
+                "volume": int(price.get("volume", 0))
             } if price else None,
 
             "dividends": float(dividends) if dividends is not None else None,

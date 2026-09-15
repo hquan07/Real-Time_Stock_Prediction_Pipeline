@@ -1,63 +1,41 @@
+import os
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, from_json
-from pyspark.sql.types import StructType, StructField, StringType, LongType, DoubleType, IntegerType
+from pyspark.sql.functions import col
+from pyspark.sql.avro.functions import from_avro
 
-# Spark schema
-stock_schema = StructType([
-    StructField("ticker", StringType(), False),
-    StructField("timestamp", LongType(), False),
-
-    StructField("price", StructType([
-        StructField("open", DoubleType(), True),
-        StructField("high", DoubleType(), True),
-        StructField("low", DoubleType(), True),
-        StructField("close", DoubleType(), True),
-        StructField("volume", IntegerType(), True),
-    ]), True),
-
-    StructField("dividends", DoubleType(), True),
-    StructField("splits", DoubleType(), True),
-
-    StructField("earnings", StructType([
-        StructField("eps_actual", DoubleType(), True),
-        StructField("eps_estimate", DoubleType(), True),
-        StructField("quarter", StringType(), True),
-    ]), True),
-
-    StructField("financials", StructType([
-        StructField("total_revenue", LongType(), True),
-        StructField("net_income", LongType(), True),
-        StructField("operating_income", LongType(), True),
-    ]), True),
-])
+# Load Avro schema
+SCHEMA_PATH = os.path.join(os.path.dirname(__file__), '../../data_ingestion/schema/stock_schema.avsc')
+with open(SCHEMA_PATH, 'r') as f:
+    avro_schema_str = f.read()
 
 # Parse + Valid
 def parse_kafka_value(df: DataFrame) -> DataFrame:
     """
-    Parse Kafka value (JSON string) to structured columns
+    Parse Kafka value (Avro binary) to structured columns
     """
     return (
-        df.selectExpr("CAST(value AS STRING) as json")
-          .select(from_json(col("json"), stock_schema).alias("data"))
+        df.select(from_avro(col("value"), avro_schema_str).alias("data"))
           .select("data.*")
     )
 
 # Clean and Transform
 def transform_raw_data(df: DataFrame) -> DataFrame:
     """
-    Clean + flatten raw stock data
+    Clean + flatten raw stock data and map to stock_prices_stream schema
     """
+    from pyspark.sql.functions import from_unixtime
 
     clean_df = (
         df
         .filter(col("ticker").isNotNull())
         .filter(col("timestamp").isNotNull())
+        .withColumn("event_time", from_unixtime(col("timestamp") / 1000).cast("timestamp"))
         .withColumn("open", col("price.open"))
         .withColumn("high", col("price.high"))
         .withColumn("low", col("price.low"))
         .withColumn("close", col("price.close"))
         .withColumn("volume", col("price.volume"))
-        .drop("price")
+        .select("ticker", "event_time", "open", "high", "low", "close", "volume")
     )
 
     return clean_df

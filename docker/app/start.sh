@@ -7,4 +7,4 @@ echo "🚀 Starting Python Application..."
 # uvicorn src.dashboard.app:app --host 0.0.0.0 --port 8000
 # python src/streaming/jobs/spark_consumer_job.py
 
-python src/main.py
+python src/dashboard/app.py

@@ -6,6 +6,7 @@ Called by train_model_dag.py
 import sys
 import os
 from datetime import datetime
+import pandas as pd
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
@@ -57,8 +58,7 @@ def run_train(
         df = load_training_data(ticker, lookback_days)
 
         if df.empty:
-            logger.warning("No training data available, generating sample")
-            df = generate_sample_training_data(lookback_days)
+            raise ValueError("No training data available in the database. Failing fast.")
 
         logger.info(f"Loaded {len(df)} training samples")
 
@@ -142,9 +142,10 @@ def run_train(
 
         # Save model
         if save_model and model_type == "random_forest":
-            model_dir = "src/machine_learning/models"
+            model_dir = "src/machine_learning/artifacts"
             os.makedirs(model_dir, exist_ok=True)
-            model_path = os.path.join(model_dir, "model.pkl")
+            ticker_name = ticker if ticker else "ALL"
+            model_path = os.path.join(model_dir, f"rf_model_{ticker_name}_v1.pkl")
 
             with open(model_path, "wb") as f:
                 pickle.dump(model, f)
@@ -175,15 +176,15 @@ def load_training_data(ticker: str = None, days: int = 365) -> pd.DataFrame:
         from src.database.db_connection import get_session
 
         query = """
-            SELECT ticker, date, open, high, low, close, volume
-            FROM price_history
-            WHERE date >= NOW() - INTERVAL ':days days'
+            SELECT ticker, event_date as date, open, high, low, close, volume
+            FROM stock_prices_stream
+            WHERE event_date >= NOW() - (:days * INTERVAL '1 day')
         """
 
         if ticker:
             query += " AND ticker = :ticker"
 
-        query += " ORDER BY date"
+        query += " ORDER BY event_date"
 
         with get_session() as session:
             result = session.execute(
@@ -197,34 +198,8 @@ def load_training_data(ticker: str = None, days: int = 365) -> pd.DataFrame:
             return df
 
     except Exception as e:
-        logger.warning(f"Could not load from database: {e}")
-
-    return pd.DataFrame()
-
-
-def generate_sample_training_data(days: int = 365) -> pd.DataFrame:
-    """Generate sample training data."""
-    import pandas as pd
-    import numpy as np
-
-    dates = pd.date_range(end=datetime.now(), periods=days, freq="D")
-
-    np.random.seed(42)
-    base_price = 150.0
-    returns = np.random.normal(0.0005, 0.02, days)
-    prices = base_price * np.cumprod(1 + returns)
-
-    df = pd.DataFrame({
-        "ticker": "SAMPLE",
-        "date": dates,
-        "open": prices * np.random.uniform(0.99, 1.01, days),
-        "high": prices * np.random.uniform(1.01, 1.03, days),
-        "low": prices * np.random.uniform(0.97, 0.99, days),
-        "close": prices,
-        "volume": np.random.randint(1000000, 10000000, days),
-    })
-
-    return df
+        logger.error(f"Could not load from database: {e}")
+        raise
 
 
 if __name__ == "__main__":
