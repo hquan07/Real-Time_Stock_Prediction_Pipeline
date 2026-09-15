@@ -869,8 +869,30 @@ ALTER TABLE ONLY public.stock_splits
 
 
 --
+-- Name: stock_prices_stream; Type: TABLE; Schema: public; Owner: postgres
+--
+CREATE TABLE IF NOT EXISTS public.stock_prices_stream (
+    id BIGSERIAL PRIMARY KEY,
+    ticker VARCHAR(20) NOT NULL,
+    event_time TIMESTAMP NOT NULL,
+    ingest_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    open NUMERIC,
+    high NUMERIC,
+    low NUMERIC,
+    close NUMERIC,
+    volume BIGINT,
+    interval VARCHAR(10),
+    source VARCHAR(50),
+    event_date DATE GENERATED ALWAYS AS (event_time::date) STORED
+);
+
+ALTER TABLE public.stock_prices_stream OWNER TO postgres;
+
+CREATE INDEX IF NOT EXISTS idx_stock_stream_ticker_time
+ON public.stock_prices_stream (ticker, event_time);
+
+--
 -- PostgreSQL database dump complete
 --
 
 \unrestrict PJ1BAkSyIJl1UdqDofio57TZ9XZQsuc7XRYiBoC451pCKdxStyarfJBgIhof4id
-

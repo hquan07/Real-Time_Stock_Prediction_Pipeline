@@ -23,10 +23,13 @@ from ..transformations.transform_raw_data import (
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "stock_raw_data")
 
-POSTGRES_URL = os.getenv("POSTGRES_URL", "jdbc:postgresql://postgres:5432/stockdb")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgres")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "stockdb")
+POSTGRES_URL = os.getenv("POSTGRES_URL", f"jdbc:postgresql://{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "Huyquan1607")
-POSTGRES_TABLE = os.getenv("POSTGRES_TABLE", "stock_prices")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+POSTGRES_TABLE = os.getenv("POSTGRES_TABLE", "stock_prices_stream")
 
 
 def create_spark_session(app_name: str = "KafkaSparkConsumer") -> SparkSession:
