@@ -7,7 +7,7 @@ from typing import Tuple, Any, Dict, List
 import numpy as np
 import pandas as pd
 import psycopg2
-from dash import Input, Output, State, callback
+from dash import Input, Output, State, callback, html
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 from loguru import logger
@@ -33,15 +33,16 @@ COLORS = {
     "danger": "#ef4444",
     "text": "#ffffff",
     "text_secondary": "#94a3b8",
+    "text_muted": "#64748b",
 }
 
 # DB Config
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 5433,
-    "database": "stockdb",
-    "user": "postgres",
-    "password": "Huyquan1607"
+    "host": os.getenv("POSTGRES_HOST", "localhost"),
+    "port": int(os.getenv("POSTGRES_PORT", 5433)),
+    "database": os.getenv("POSTGRES_DB", "stockdb"),
+    "user": os.getenv("POSTGRES_USER", "postgres"),
+    "password": os.getenv("POSTGRES_PASSWORD", "Huyquan1607")
 }
 
 ARTIFACTS_DIR = os.path.join(os.path.dirname(__file__), "..", "machine_learning", "artifacts")
@@ -57,10 +58,10 @@ def fetch_stock_data(ticker: str, period: str = "3mo") -> pd.DataFrame:
         
         conn = psycopg2.connect(**DB_CONFIG)
         query = """
-            SELECT date, open, high, low, close, volume
-            FROM price_history
-            WHERE ticker = %s AND date >= %s
-            ORDER BY date ASC
+            SELECT event_date as date, open, high, low, close, volume
+            FROM stock_prices_stream
+            WHERE ticker = %s AND event_date >= %s
+            ORDER BY event_time ASC
         """
         df = pd.read_sql_query(query, conn, params=(ticker, start_date.date()))
         conn.close()
@@ -68,10 +69,51 @@ def fetch_stock_data(ticker: str, period: str = "3mo") -> pd.DataFrame:
         if not df.empty:
             logger.info(f"📊 Loaded {len(df)} records for {ticker}")
             return df
-    except Exception as e:
-        logger.warning(f"PostgreSQL fetch failed: {e}")
+    except psycopg2.Error as e:
+        logger.error(f"PostgreSQL fetch failed: {e}")
+        return pd.DataFrame()
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
     
     return pd.DataFrame()
+
+
+def get_active_tickers() -> list:
+    """Fetch all active tickers from companies table."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = "SELECT ticker, long_name FROM companies WHERE is_active = true ORDER BY ticker ASC"
+        df = pd.read_sql_query(query, conn)
+        return [{"label": f"{row['long_name']} ({row['ticker']})", "value": row["ticker"]} for _, row in df.iterrows()]
+    except Exception as e:
+        logger.error(f"Failed to fetch active tickers: {e}")
+        return [{"label": "Apple Inc. (AAPL)", "value": "AAPL"}] # Fallback
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_user_watchlist(user_id: str = "default_user") -> list:
+    """Fetch user watchlist."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = "SELECT ticker FROM user_watchlist WHERE user_id = %s ORDER BY added_at DESC"
+        df = pd.read_sql_query(query, conn, params=(user_id,))
+        if df.empty:
+            return ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META"]
+        return df["ticker"].tolist()
+    except Exception as e:
+        logger.error(f"Failed to fetch watchlist: {e}")
+        return ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META"]
+    finally:
+        if conn:
+            conn.close()
 
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
@@ -114,56 +156,58 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def load_rf_model(ticker: str):
-    """Load RandomForest model for ticker."""
-    model_path = os.path.join(ARTIFACTS_DIR, f"rf_model_{ticker}_v1.pkl")
-    if not os.path.exists(model_path):
-        model_path = os.path.join(ARTIFACTS_DIR, "rf_model_ALL_v1.pkl")
-        
-    if os.path.exists(model_path):
-        with open(model_path, "rb") as f:
-            return pickle.load(f)
-    return None
-
-
-def predict_with_rf(ticker: str, df: pd.DataFrame) -> Tuple[float, float]:
-    """Make prediction using RandomForest."""
-    model = load_rf_model(ticker)
-    if model is None:
-        return None, None
-    
-    # Extract features from model if available
-    feature_cols = []
-    if hasattr(model, "feature_names_in_"):
-        feature_cols = list(model.feature_names_in_)
-    
-    mape = 2.5 # Mock mape
+def predict_with_rf(ticker: str, df: pd.DataFrame) -> Tuple[float, float, float]:
+    """Make prediction using latest model from registry."""
+    try:
+        from src.machine_learning.model_registry import ModelRegistry
+        model, scaler, metadata = ModelRegistry.load_latest_model()
+    except Exception as e:
+        logger.error(f"Could not load model from registry: {e}")
+        return None, None, None
     
     # Prepare features
     df_features = calculate_indicators(df)
     df_features = df_features.dropna()
     
     if df_features.empty:
-        return None, mape
+        return None, None, None
+        
+    feature_cols = metadata.get("features", [])
     
     # Use available features
     if feature_cols:
         available_cols = [c for c in feature_cols if c in df_features.columns]
         if len(available_cols) < len(feature_cols):
-            # Fill missing with close price
+            # Fill missing with close price as fallback
             for c in feature_cols:
                 if c not in df_features.columns:
                     df_features[c] = df_features['close']
         
         X = df_features[feature_cols].iloc[-1:].values
     else:
-        # Fallback if model doesn't have feature_names_in_
+        # Fallback
         numeric_cols = df_features.select_dtypes(include=[np.number]).columns
         X = df_features[numeric_cols].iloc[-1:].values
         
-    prediction = model.predict(X)[0]
+    if scaler is not None:
+        X = scaler.transform(X)
+        
+    # Model predicts log_return
+    pred_return = float(model.predict(X)[0])
+    last_close = float(df_features['close'].iloc[-1])
     
-    return prediction, mape
+    predicted_close = last_close * np.exp(pred_return)
+    
+    ci_width = 0.0
+    if hasattr(model, "estimators_"):
+        preds_trees = np.stack([tree.predict(X) for tree in model.estimators_])
+        ci_std = np.std(preds_trees, axis=0)
+        ci_width = float(np.mean(ci_std) * 1.96)
+    else:
+        ci_width = metadata.get("metrics", {}).get("test_rmse", 0.0) * 1.96
+        
+    # Return (predicted_close, mape/rmse, ci_width)
+    return predicted_close, ci_width, pred_return
 
 
 # Register Callbacks
@@ -248,6 +292,7 @@ def register_callbacks(app):
         
         df = fetch_stock_data(ticker, time_range)
         df = calculate_indicators(df)
+        df = df.replace({np.nan: None})
         
         return df.to_dict("records") if not df.empty else []
 
@@ -289,10 +334,10 @@ def register_callbacks(app):
         rsi = df["rsi"].iloc[-1] if "rsi" in df.columns else 50
         
         # ML Prediction
-        prediction, mape = predict_with_rf(ticker, df)
+        prediction, ci_width, pred_return = predict_with_rf(ticker, df)
         if prediction is None:
             prediction = current_price * (1 + daily_change / 100)
-            mape = 0
+            ci_width = 0.0
         
         # Styles
         price_style = {**default_style}
@@ -307,14 +352,14 @@ def register_callbacks(app):
             change_style,
             f"{volume/1e6:.1f}M",
             f"${prediction:,.2f}",
-            f"{mape:.1f}%",
+            f"±${ci_width:.2f}",
             f"{rsi:.0f}" if not pd.isna(rsi) else "50",
         )
 
     # Sparkline callbacks - render CSS bar charts
     def create_sparkline_bars(data, color, bar_count=8):
         """Create HTML children for sparkline bars."""
-        if not data or len(data) < bar_count:
+        if data is None or len(data) < bar_count:
             return []
         
         # Get last N values and normalize to 0-100% height
@@ -447,7 +492,7 @@ def register_callbacks(app):
         
         # ML Prediction line
         if "prediction" in overlays:
-            prediction, _ = predict_with_rf(ticker, df)
+            prediction, ci_width, _ = predict_with_rf(ticker, df)
             if prediction:
                 last_date = pd.to_datetime(df["date"].iloc[-1])
                 next_date = last_date + timedelta(days=1)
@@ -550,6 +595,83 @@ def register_callbacks(app):
             font=dict(color=COLORS["text"], size=10),
             margin=dict(l=0, r=0, t=5, b=5),
             showlegend=False,
+        )
+        
+        return fig
+
+    # Drawdown Chart
+    @app.callback(
+        Output("drawdown-chart", "figure"),
+        [Input("price-data-store", "data")],
+    )
+    def update_drawdown_chart(data):
+        if not data:
+            return go.Figure()
+            
+        df = pd.DataFrame(data)
+        if df.empty or "close" not in df.columns:
+            return go.Figure()
+            
+        fig = go.Figure()
+        
+        # Calculate drawdown
+        cumulative_max = df["close"].cummax()
+        drawdown = (df["close"] - cumulative_max) / cumulative_max * 100
+        
+        fig.add_trace(go.Scatter(
+            x=df["date"], y=drawdown, mode="lines", name="Drawdown",
+            fill="tozeroy",
+            line=dict(color=COLORS["danger"], width=1.5),
+            fillcolor="rgba(239, 68, 68, 0.2)"
+        ))
+        
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color=COLORS["text"], size=10),
+            margin=dict(l=0, r=0, t=20, b=20),
+            showlegend=False,
+            yaxis=dict(title="Drawdown (%)", ticksuffix="%")
+        )
+        
+        return fig
+
+    # Returns Distribution Chart
+    @app.callback(
+        Output("returns-dist-chart", "figure"),
+        [Input("price-data-store", "data")],
+    )
+    def update_returns_dist_chart(data):
+        if not data:
+            return go.Figure()
+            
+        df = pd.DataFrame(data)
+        if df.empty or "close" not in df.columns:
+            return go.Figure()
+            
+        fig = go.Figure()
+        
+        # Calculate daily returns
+        returns = df["close"].pct_change().dropna() * 100
+        
+        fig.add_trace(go.Histogram(
+            x=returns,
+            nbinsx=50,
+            name="Returns",
+            marker_color=COLORS["primary"],
+            opacity=0.7
+        ))
+        
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color=COLORS["text"], size=10),
+            margin=dict(l=20, r=20, t=20, b=20),
+            showlegend=False,
+            xaxis=dict(title="Daily Return (%)", ticksuffix="%"),
+            yaxis=dict(title="Frequency")
         )
         
         return fig
