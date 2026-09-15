@@ -1,8 +1,3 @@
-FROM ubuntu:latest
-LABEL authors="hquan07"
-
-ENTRYPOINT ["top", "-b"]
-
 # ------------------------------------------
 # Base Image
 FROM python:3.10-slim
@@ -21,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 
 # ------------------------------------------
 # Copy requirements
-COPY ../../requirements.txt /app/requirements.txt
+COPY ../../requirements-dashboard.txt /app/requirements.txt
 
 # ------------------------------------------
 # Install Python packages

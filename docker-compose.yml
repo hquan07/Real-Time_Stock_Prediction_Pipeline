@@ -17,6 +17,9 @@ x-airflow-common: &airflow-common
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
+    - ./src:/opt/airflow/src
+    - ./scripts:/opt/airflow/scripts
+    - ./src/machine_learning/artifacts:/opt/airflow/src/machine_learning/artifacts
   depends_on:
     postgres:
       condition: service_healthy
@@ -188,4 +191,29 @@ services:
 # ---------------------------
 volumes:
   postgres_data:
-  kafka_data:
+  postgres_data_backup:
+  pgadmin_data:
+  redis_data:
+
+  # ---------------------------
+  # Dashboard Service
+  # ---------------------------
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: stock-dashboard
+    restart: always
+    ports:
+      - "8050:8050"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-stockdb}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Huyquan1607}
+    networks:
+      - streaming_network
+    depends_on:
+      postgres:
+        condition: service_healthy
