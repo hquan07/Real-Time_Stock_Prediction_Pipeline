@@ -186,15 +186,6 @@ services:
       - ./models:/home/jovyan/models
     restart: always
 
-# ---------------------------
-# VOLUMES
-# ---------------------------
-volumes:
-  postgres_data:
-  postgres_data_backup:
-  pgadmin_data:
-  redis_data:
-
   # ---------------------------
   # Dashboard Service
   # ---------------------------
@@ -211,9 +202,19 @@ volumes:
       - POSTGRES_PORT=5432
       - POSTGRES_DB=${POSTGRES_DB:-stockdb}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Huyquan1607}
-    networks:
-      - streaming_network
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-your_password_here}
+    volumes:
+      - ./src:/app/src
     depends_on:
       postgres:
         condition: service_healthy
+
+# ---------------------------
+# VOLUMES
+# ---------------------------
+volumes:
+  postgres_data:
+  postgres_data_backup:
+  pgadmin_data:
+  redis_data:
+  kafka_data:

@@ -39,7 +39,8 @@ def create_spark_session(app_name: str = "KafkaSparkConsumer") -> SparkSession:
         .appName(app_name)
         .config("spark.jars.packages", 
                 "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,"
-                "org.postgresql:postgresql:42.6.0")
+                "org.postgresql:postgresql:42.6.0,"
+                "org.apache.spark:spark-avro_2.12:3.5.0")
         .config("spark.sql.streaming.checkpointLocation", "/tmp/spark-checkpoint")
         .getOrCreate()
     )
@@ -52,7 +53,7 @@ def read_from_kafka(spark: SparkSession) -> DataFrame:
         .format("kafka")
         .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS)
         .option("subscribe", KAFKA_TOPIC)
-        .option("startingOffsets", "latest")
+        .option("startingOffsets", "earliest")
         .option("failOnDataLoss", "false")
         .load()
     )

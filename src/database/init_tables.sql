@@ -148,11 +148,22 @@ CREATE TABLE public.companies (
     country text,
     exchange text,
     website text,
-    description text
+    description text,
+    is_active boolean DEFAULT true
 );
 
 
 ALTER TABLE public.companies OWNER TO postgres;
+
+CREATE TABLE public.user_watchlist (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(50) DEFAULT 'default_user',
+    ticker VARCHAR(20) REFERENCES public.companies(ticker),
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, ticker)
+);
+
+ALTER TABLE public.user_watchlist OWNER TO postgres;
 
 --
 -- Name: dividends; Type: TABLE; Schema: public; Owner: postgres
