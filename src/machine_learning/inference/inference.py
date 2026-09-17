@@ -112,6 +112,7 @@ class InferenceEngine:
         model_path: str = None,
         scaler_path: str = None,
         feature_columns: List[str] = None,
+        use_registry: bool = True,
     ):
         """
         Initialize inference engine.
@@ -120,17 +121,25 @@ class InferenceEngine:
             model_path: Path to trained model
             scaler_path: Path to fitted scaler
             feature_columns: List of feature column names
+            use_registry: Use ModelRegistry to load the latest model if paths not provided
         """
-        self.model = ModelLoader.load_model(model_path)
-        self.scaler_data = ModelLoader.load_scaler(scaler_path)
-        self.feature_columns = feature_columns
-
-        # Extract scaler if loaded
-        self.scaler = None
-        if self.scaler_data:
-            self.scaler = self.scaler_data.get("scaler")
-            if not self.feature_columns:
-                self.feature_columns = self.scaler_data.get("feature_names", [])
+        if use_registry and model_path is None:
+            try:
+                from src.machine_learning.model_registry import ModelRegistry
+                self.model, self.scaler, metadata = ModelRegistry.load_latest_model()
+                self.feature_columns = metadata.get("features", [])
+                logger.info(f"Loaded model {metadata.get('version')} from registry")
+            except Exception as e:
+                logger.warning(f"Could not load from registry: {e}. Falling back to default paths.")
+                self.model = ModelLoader.load_model(model_path)
+                self.scaler_data = ModelLoader.load_scaler(scaler_path)
+                self.scaler = self.scaler_data.get("scaler") if self.scaler_data else None
+                self.feature_columns = self.scaler_data.get("feature_names", []) if self.scaler_data else feature_columns
+        else:
+            self.model = ModelLoader.load_model(model_path)
+            self.scaler_data = ModelLoader.load_scaler(scaler_path)
+            self.scaler = self.scaler_data.get("scaler") if self.scaler_data else None
+            self.feature_columns = self.scaler_data.get("feature_names", []) if self.scaler_data else feature_columns
 
         logger.info(f"✅ Inference engine initialized with {len(self.feature_columns)} features")
 
@@ -155,13 +164,17 @@ class InferenceEngine:
                 missing = set(self.feature_columns) - set(data.columns)
                 if missing:
                     raise ValueError(f"Missing required features: {missing}")
+                
+                # Apply scaling if available
+                if self.scaler is not None:
+                    if type(self.scaler).__name__ == "DataScaler":
+                        data = self.scaler.transform(data)
+                    else:
+                        data[self.feature_columns] = self.scaler.transform(data[self.feature_columns])
+                        
                 data = data[self.feature_columns].values
             else:
                 data = data.select_dtypes(include=[np.number]).values
-
-        # Apply scaling if available
-        if self.scaler is not None:
-            data = self.scaler.transform(data)
 
         return data
 
@@ -263,20 +276,39 @@ def predict_next_price(
     try:
         engine = InferenceEngine(model_path, scaler_path)
         prediction = engine.predict_single(current_data)
+        
+        # Calculate Confidence Interval
+        ci_width = 0.0
+        if hasattr(engine.model, "estimators_"):
+            # Random Forest CI approximation
+            X = engine.preprocess(current_data)
+            preds_trees = np.stack([tree.predict(X) for tree in engine.model.estimators_])
+            ci_std = np.std(preds_trees, axis=0)
+            ci_width = float(np.mean(ci_std) * 1.96)
+        else:
+            try:
+                from src.machine_learning.model_registry import ModelRegistry
+                _, _, metadata = ModelRegistry.load_latest_model()
+                ci_width = metadata.get("metrics", {}).get("test_rmse", 0) * 1.96
+            except:
+                ci_width = 0.0
 
         return {
             "ticker": ticker,
-            "predicted_close": prediction,
+            "predicted_return": prediction,
+            "confidence_interval_width": ci_width,
             "prediction_time": datetime.now().isoformat(),
             "input_data": current_data,
             "status": "success",
         }
 
     except Exception as e:
-        logger.error(f"❌ Prediction failed for {ticker}: {e}")
+        import traceback
+        logger.error(f"❌ Prediction failed for {ticker}: {e}\n{traceback.format_exc()}")
         return {
             "ticker": ticker,
-            "predicted_close": None,
+            "predicted_return": None,
+            "confidence_interval_width": None,
             "prediction_time": datetime.now().isoformat(),
             "error": str(e),
             "status": "error",
@@ -293,39 +325,13 @@ def get_model_info(model_path: str = None) -> Dict[str, Any]:
     Returns:
         Dict with model type, features, metrics, etc.
     """
-    if model_path is None:
-        model_path = os.path.join(MODEL_DIR, "model.pkl")
-
-    info = {
-        "model_path": model_path,
-        "exists": os.path.exists(model_path),
-    }
-
-    if info["exists"]:
-        model = ModelLoader.load_model(model_path)
-
-        info["model_type"] = type(model).__name__
-
-        # Get feature names if available
-        if hasattr(model, "feature_names_in_"):
-            info["feature_names"] = list(model.feature_names_in_)
-
-        # Get number of features
-        if hasattr(model, "n_features_in_"):
-            info["n_features"] = model.n_features_in_
-
-        # Get model-specific info
-        if hasattr(model, "n_estimators"):
-            info["n_estimators"] = model.n_estimators
-
-        # Load metrics if available
-        metrics = ModelLoader.load_metrics()
-        if metrics:
-            info["metrics"] = metrics
-
-        # File info
-        stat = os.stat(model_path)
-        info["file_size_mb"] = round(stat.st_size / (1024 * 1024), 2)
-        info["last_modified"] = datetime.fromtimestamp(stat.st_mtime).isoformat()
-
-    return info
+    try:
+        from src.machine_learning.model_registry import ModelRegistry
+        _, _, metadata = ModelRegistry.load_latest_model()
+        return metadata
+    except Exception as e:
+        logger.warning(f"Could not get model info from registry: {e}")
+        return {
+            "exists": False,
+            "error": str(e)
+        }

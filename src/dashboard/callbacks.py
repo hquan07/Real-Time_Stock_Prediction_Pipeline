@@ -7,13 +7,14 @@ from typing import Tuple, Any, Dict, List
 import numpy as np
 import pandas as pd
 import psycopg2
-from dash import Input, Output, State, callback
+from dash import Input, Output, State, callback, html
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 from loguru import logger
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Add src and project root to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 try:
     import torch
@@ -25,6 +26,7 @@ except ImportError:
 COLORS = {
     "background": "#0f0f1a",
     "card": "rgba(26, 26, 46, 0.8)",
+    "card_border": "rgba(255, 255, 255, 0.1)",
     "primary": "#6366f1",
     "secondary": "#8b5cf6",
     "accent": "#f43f5e",
@@ -33,15 +35,16 @@ COLORS = {
     "danger": "#ef4444",
     "text": "#ffffff",
     "text_secondary": "#94a3b8",
+    "text_muted": "#64748b",
 }
 
 # DB Config
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 5433,
-    "database": "stockdb",
-    "user": "postgres",
-    "password": "Huyquan1607"
+    "host": os.getenv("POSTGRES_HOST", "localhost"),
+    "port": int(os.getenv("POSTGRES_PORT", 5433)),
+    "database": os.getenv("POSTGRES_DB", "stockdb"),
+    "user": os.getenv("POSTGRES_USER", "postgres"),
+    "password": os.getenv("POSTGRES_PASSWORD", "Huyquan1607")
 }
 
 ARTIFACTS_DIR = os.path.join(os.path.dirname(__file__), "..", "machine_learning", "artifacts")
@@ -57,21 +60,117 @@ def fetch_stock_data(ticker: str, period: str = "3mo") -> pd.DataFrame:
         
         conn = psycopg2.connect(**DB_CONFIG)
         query = """
-            SELECT date, open, high, low, close, volume
-            FROM price_history
-            WHERE ticker = %s AND date >= %s
-            ORDER BY date ASC
+            SELECT event_date as date, open, high, low, close, volume
+            FROM stock_prices_stream
+            WHERE ticker = %s AND event_date >= %s
+            ORDER BY event_time ASC
         """
         df = pd.read_sql_query(query, conn, params=(ticker, start_date.date()))
         conn.close()
         
         if not df.empty:
+            df = df.drop_duplicates(subset=['date'], keep='last').reset_index(drop=True)
             logger.info(f"📊 Loaded {len(df)} records for {ticker}")
             return df
-    except Exception as e:
-        logger.warning(f"PostgreSQL fetch failed: {e}")
+    except psycopg2.Error as e:
+        logger.error(f"PostgreSQL fetch failed: {e}")
+        return pd.DataFrame()
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
     
     return pd.DataFrame()
+
+
+def get_active_tickers() -> list:
+    """Fetch all active tickers from companies table."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = "SELECT ticker, long_name FROM companies WHERE is_active = true ORDER BY ticker ASC"
+        df = pd.read_sql_query(query, conn)
+        return [{"label": f"{row['long_name']} ({row['ticker']})", "value": row["ticker"]} for _, row in df.iterrows()]
+    except Exception as e:
+        logger.error(f"Failed to fetch active tickers: {e}")
+        return [{"label": "Apple Inc. (AAPL)", "value": "AAPL"}] # Fallback
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_user_watchlist(user_id: str = "default_user") -> list:
+    """Fetch user watchlist."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = "SELECT ticker FROM user_watchlist WHERE user_id = %s ORDER BY added_at DESC"
+        df = pd.read_sql_query(query, conn, params=(user_id,))
+        if df.empty:
+            return ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META"]
+        return df["ticker"].tolist()
+    except Exception as e:
+        logger.error(f"Failed to fetch watchlist: {e}")
+        return ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META"]
+    finally:
+        if conn:
+            conn.close()
+
+def fetch_portfolio(user_id: str = "default_user") -> pd.DataFrame:
+    """Fetch portfolio data for a user."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = """
+            WITH LatestPrices AS (
+                SELECT ticker, close as current_price
+                FROM (
+                    SELECT ticker, close, ROW_NUMBER() OVER(PARTITION BY ticker ORDER BY event_time DESC) as rn
+                    FROM stock_prices_stream
+                ) tmp
+                WHERE rn = 1
+            )
+            SELECT 
+                p.ticker,
+                p.shares as quantity,
+                p.avg_price as average_price,
+                COALESCE(lp.current_price, p.avg_price) as current_price
+            FROM portfolio p
+            LEFT JOIN LatestPrices lp ON p.ticker = lp.ticker
+            WHERE p.user_id = %s
+        """
+        df = pd.read_sql_query(query, conn, params=(user_id,))
+        if not df.empty:
+            df["quantity"] = pd.to_numeric(df["quantity"], errors='coerce')
+            df["average_price"] = pd.to_numeric(df["average_price"], errors='coerce')
+            df["current_price"] = pd.to_numeric(df["current_price"], errors='coerce')
+            df["total_cost"] = df["quantity"] * df["average_price"]
+            df["total_value"] = df["quantity"] * df["current_price"]
+            df["unrealized_pnl"] = df["total_value"] - df["total_cost"]
+        return df
+    except Exception as e:
+        logger.error(f"Failed to fetch portfolio: {e}")
+        return pd.DataFrame()
+    finally:
+        if conn:
+            conn.close()
+
+def fetch_signals(limit: int = 20) -> pd.DataFrame:
+    """Fetch recent trading signals."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = "SELECT ticker, signal_type, reason, confidence as confidence_score, created_at as generated_at FROM signals ORDER BY created_at DESC LIMIT %s"
+        df = pd.read_sql_query(query, conn, params=(limit,))
+        return df
+    except Exception as e:
+        logger.error(f"Failed to fetch signals: {e}")
+        return pd.DataFrame()
+    finally:
+        if conn:
+            conn.close()
 
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
@@ -81,14 +180,14 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     
     # Moving Averages
-    df['ma5'] = df['close'].rolling(window=5).mean()
-    df['ma20'] = df['close'].rolling(window=20).mean()
-    df['ma50'] = df['close'].rolling(window=50).mean()
+    df['ma5'] = df['close'].rolling(window=5, min_periods=1).mean()
+    df['ma20'] = df['close'].rolling(window=20, min_periods=1).mean()
+    df['ma50'] = df['close'].rolling(window=50, min_periods=1).mean()
     
     # RSI
     delta = df['close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14, min_periods=1).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14, min_periods=1).mean()
     rs = gain / loss
     df['rsi'] = 100 - (100 / (1 + rs))
     
@@ -100,70 +199,81 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df['macd_hist'] = df['macd'] - df['macd_signal']
     
     # Bollinger Bands
-    df['bb_middle'] = df['close'].rolling(window=20).mean()
-    rolling_std = df['close'].rolling(window=20).std()
+    df['bb_middle'] = df['close'].rolling(window=20, min_periods=1).mean()
+    rolling_std = df['close'].rolling(window=20, min_periods=1).std().fillna(0)
     df['bb_upper'] = df['bb_middle'] + (rolling_std * 2)
     df['bb_lower'] = df['bb_middle'] - (rolling_std * 2)
     
     # Volume ratio
-    df['volume_ratio'] = df['volume'] / df['volume'].rolling(window=20).mean()
+    df['volume_ratio'] = df['volume'] / df['volume'].rolling(window=20, min_periods=1).mean().replace(0, 1)
     
     # Price change
-    df['price_change'] = df['close'].pct_change()
+    df['price_change'] = df['close'].pct_change().fillna(0)
     
+    df = df.fillna(0)
     return df
 
 
-def load_rf_model(ticker: str):
-    """Load RandomForest model for ticker."""
-    model_path = os.path.join(ARTIFACTS_DIR, f"rf_model_{ticker}_v1.pkl")
-    if not os.path.exists(model_path):
-        model_path = os.path.join(ARTIFACTS_DIR, "rf_model_ALL_v1.pkl")
-        
-    if os.path.exists(model_path):
-        with open(model_path, "rb") as f:
-            return pickle.load(f)
-    return None
-
-
-def predict_with_rf(ticker: str, df: pd.DataFrame) -> Tuple[float, float]:
-    """Make prediction using RandomForest."""
-    model = load_rf_model(ticker)
-    if model is None:
-        return None, None
-    
-    # Extract features from model if available
-    feature_cols = []
-    if hasattr(model, "feature_names_in_"):
-        feature_cols = list(model.feature_names_in_)
-    
-    mape = 2.5 # Mock mape
+def predict_with_rf(ticker: str, df: pd.DataFrame) -> Tuple[float, float, float]:
+    """Make prediction using latest model from registry."""
+    try:
+        from machine_learning.model_registry import ModelRegistry
+        model, scaler, metadata = ModelRegistry.load_latest_model()
+    except Exception as e:
+        logger.error(f"Could not load model from registry: {e}")
+        return None, None, None
     
     # Prepare features
     df_features = calculate_indicators(df)
     df_features = df_features.dropna()
     
     if df_features.empty:
-        return None, mape
+        return None, None, None
+        
+    feature_cols = metadata.get("features", [])
     
-    # Use available features
     if feature_cols:
         available_cols = [c for c in feature_cols if c in df_features.columns]
         if len(available_cols) < len(feature_cols):
-            # Fill missing with close price
+            # Fill missing with close price as fallback
             for c in feature_cols:
                 if c not in df_features.columns:
                     df_features[c] = df_features['close']
         
-        X = df_features[feature_cols].iloc[-1:].values
+        X = df_features[feature_cols].iloc[-1:].copy()
     else:
-        # Fallback if model doesn't have feature_names_in_
+        # Fallback
         numeric_cols = df_features.select_dtypes(include=[np.number]).columns
-        X = df_features[numeric_cols].iloc[-1:].values
+        X = df_features[numeric_cols].iloc[-1:].copy()
         
-    prediction = model.predict(X)[0]
+    if scaler is not None:
+        if hasattr(scaler, "feature_names") and scaler.feature_names:
+            for c in scaler.feature_names:
+                if c not in X.columns:
+                    X[c] = 0.0
+        X = scaler.transform(X)
+        
+        # The scaler might have been trained on target as well, but model only expects feature_cols
+        if feature_cols:
+            X = X[feature_cols].copy()
+            
+    # Model predicts log_return
+
+    pred_return = float(model.predict(X)[0])
+    last_close = float(df_features['close'].iloc[-1])
     
-    return prediction, mape
+    predicted_close = last_close * np.exp(pred_return)
+    
+    ci_width = 0.0
+    if hasattr(model, "estimators_"):
+        preds_trees = np.stack([tree.predict(X) for tree in model.estimators_])
+        ci_std = np.std(preds_trees, axis=0)
+        ci_width = float(np.mean(ci_std) * 1.96)
+    else:
+        ci_width = metadata.get("metrics", {}).get("test_rmse", 0.0) * 1.96
+        
+    # Return (predicted_close, mape/rmse, ci_width)
+    return predicted_close, ci_width, pred_return
 
 
 # Register Callbacks
@@ -248,6 +358,7 @@ def register_callbacks(app):
         
         df = fetch_stock_data(ticker, time_range)
         df = calculate_indicators(df)
+        df = df.replace({np.nan: None})
         
         return df.to_dict("records") if not df.empty else []
 
@@ -289,10 +400,10 @@ def register_callbacks(app):
         rsi = df["rsi"].iloc[-1] if "rsi" in df.columns else 50
         
         # ML Prediction
-        prediction, mape = predict_with_rf(ticker, df)
+        prediction, ci_width, pred_return = predict_with_rf(ticker, df)
         if prediction is None:
             prediction = current_price * (1 + daily_change / 100)
-            mape = 0
+            ci_width = 0.0
         
         # Styles
         price_style = {**default_style}
@@ -307,14 +418,14 @@ def register_callbacks(app):
             change_style,
             f"{volume/1e6:.1f}M",
             f"${prediction:,.2f}",
-            f"{mape:.1f}%",
+            f"±${ci_width:.2f}",
             f"{rsi:.0f}" if not pd.isna(rsi) else "50",
         )
 
     # Sparkline callbacks - render CSS bar charts
     def create_sparkline_bars(data, color, bar_count=8):
         """Create HTML children for sparkline bars."""
-        if not data or len(data) < bar_count:
+        if data is None or len(data) < bar_count:
             return []
         
         # Get last N values and normalize to 0-100% height
@@ -447,7 +558,7 @@ def register_callbacks(app):
         
         # ML Prediction line
         if "prediction" in overlays:
-            prediction, _ = predict_with_rf(ticker, df)
+            prediction, ci_width, _ = predict_with_rf(ticker, df)
             if prediction:
                 last_date = pd.to_datetime(df["date"].iloc[-1])
                 next_date = last_date + timedelta(days=1)
@@ -468,6 +579,12 @@ def register_callbacks(app):
             font=dict(color=COLORS["text"]),
             xaxis_rangeslider_visible=False,
             hovermode="x unified",
+            hoverlabel=dict(
+                bgcolor=COLORS["card"],
+                font_color=COLORS["text"],
+                bordercolor=COLORS["card_border"],
+                font_size=14
+            ),
             legend=dict(orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5),
             margin=dict(l=0, r=0, t=10, b=0),
         )
@@ -550,6 +667,83 @@ def register_callbacks(app):
             font=dict(color=COLORS["text"], size=10),
             margin=dict(l=0, r=0, t=5, b=5),
             showlegend=False,
+        )
+        
+        return fig
+
+    # Drawdown Chart
+    @app.callback(
+        Output("drawdown-chart", "figure"),
+        [Input("price-data-store", "data")],
+    )
+    def update_drawdown_chart(data):
+        if not data:
+            return go.Figure()
+            
+        df = pd.DataFrame(data)
+        if df.empty or "close" not in df.columns:
+            return go.Figure()
+            
+        fig = go.Figure()
+        
+        # Calculate drawdown
+        cumulative_max = df["close"].cummax()
+        drawdown = (df["close"] - cumulative_max) / cumulative_max * 100
+        
+        fig.add_trace(go.Scatter(
+            x=df["date"], y=drawdown, mode="lines", name="Drawdown",
+            fill="tozeroy",
+            line=dict(color=COLORS["danger"], width=1.5),
+            fillcolor="rgba(239, 68, 68, 0.2)"
+        ))
+        
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color=COLORS["text"], size=10),
+            margin=dict(l=0, r=0, t=20, b=20),
+            showlegend=False,
+            yaxis=dict(title="Drawdown (%)", ticksuffix="%")
+        )
+        
+        return fig
+
+    # Returns Distribution Chart
+    @app.callback(
+        Output("returns-dist-chart", "figure"),
+        [Input("price-data-store", "data")],
+    )
+    def update_returns_dist_chart(data):
+        if not data:
+            return go.Figure()
+            
+        df = pd.DataFrame(data)
+        if df.empty or "close" not in df.columns:
+            return go.Figure()
+            
+        fig = go.Figure()
+        
+        # Calculate daily returns
+        returns = df["close"].pct_change().dropna() * 100
+        
+        fig.add_trace(go.Histogram(
+            x=returns,
+            nbinsx=50,
+            name="Returns",
+            marker_color=COLORS["primary"],
+            opacity=0.7
+        ))
+        
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color=COLORS["text"], size=10),
+            margin=dict(l=20, r=20, t=20, b=20),
+            showlegend=False,
+            xaxis=dict(title="Daily Return (%)", ticksuffix="%"),
+            yaxis=dict(title="Frequency")
         )
         
         return fig
@@ -740,6 +934,12 @@ def register_callbacks(app):
             margin=dict(l=0, r=0, t=10, b=0),
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
             hovermode="x unified",
+            hoverlabel=dict(
+                bgcolor=COLORS["card"],
+                font_color=COLORS["text"],
+                bordercolor=COLORS["card_border"],
+                font_size=12
+            ),
         )
         
         return fig
@@ -799,6 +999,12 @@ def register_callbacks(app):
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
             yaxis_title="MAPE %",
             hovermode="x unified",
+            hoverlabel=dict(
+                bgcolor=COLORS["card"],
+                font_color=COLORS["text"],
+                bordercolor=COLORS["card_border"],
+                font_size=12
+            ),
         )
         
         return fig
@@ -811,3 +1017,165 @@ def register_callbacks(app):
     def update_time(n_intervals):
         now = datetime.now().strftime("%H:%M:%S")
         return f"Updated: {now}"
+
+    # Portfolio callbacks
+    @app.callback(
+        [
+            Output("portfolio-summary", "children"),
+            Output("asset-allocation-chart", "figure"),
+            Output("portfolio-holdings-table", "children"),
+            Output("signals-table", "children"),
+        ],
+        [Input("dashboard-tabs", "value"), Input("interval-component", "n_intervals")],
+    )
+    def update_portfolio_tab(tab, n_intervals):
+        if tab != "portfolio":
+            raise PreventUpdate
+            
+        # 1. Fetch Portfolio
+        df_port = fetch_portfolio()
+        
+        summary_children = []
+        fig_alloc = go.Figure()
+        table_holdings = html.Div("No portfolio data")
+        
+        if not df_port.empty:
+            total_value = df_port["total_value"].sum()
+            total_cost = df_port["total_cost"].sum()
+            total_pnl = df_port["unrealized_pnl"].sum()
+            pnl_pct = (total_pnl / total_cost * 100) if total_cost > 0 else 0
+            
+            # Create summary cards
+            summary_children = [
+                html.Div([
+                    html.H4("Total Value", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"${total_value:,.2f}", style={"color": COLORS["text"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(99, 102, 241, 0.1)", "borderRadius": "12px"}),
+                html.Div([
+                    html.H4("Total P&L", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"${total_pnl:,.2f}", style={"color": COLORS["success"] if total_pnl >= 0 else COLORS["danger"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(16, 185, 129, 0.1)" if total_pnl >= 0 else "rgba(239, 68, 68, 0.1)", "borderRadius": "12px"}),
+                html.Div([
+                    html.H4("P&L %", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"{pnl_pct:,.2f}%", style={"color": COLORS["success"] if pnl_pct >= 0 else COLORS["danger"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(16, 185, 129, 0.1)" if pnl_pct >= 0 else "rgba(239, 68, 68, 0.1)", "borderRadius": "12px"}),
+                html.Div([
+                    html.H4("Positions", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"{len(df_port)}", style={"color": COLORS["text"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(255, 255, 255, 0.05)", "borderRadius": "12px"})
+            ]
+            
+            # Create Pie Chart
+            fig_alloc.add_trace(go.Pie(
+                labels=df_port["ticker"],
+                values=df_port["total_value"],
+                hole=0.6,
+                marker=dict(colors=[COLORS["primary"], COLORS["secondary"], COLORS["accent"], COLORS["success"], COLORS["warning"]]),
+                textinfo="label+percent",
+                hoverinfo="label+value+percent",
+            ))
+            fig_alloc.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                margin=dict(t=20, b=20, l=20, r=20),
+                showlegend=False
+            )
+            
+            # Create Holdings Table
+            from dash import dash_table
+            
+            # Format dataframe for display
+            df_display = df_port[["ticker", "quantity", "average_price", "current_price", "total_value", "unrealized_pnl"]].copy()
+            df_display["quantity"] = df_display["quantity"].map(lambda x: f"{x:,.0f}")
+            for col in ["average_price", "current_price", "total_value", "unrealized_pnl"]:
+                df_display[col] = df_display[col].map(lambda x: f"${x:,.2f}")
+                
+            df_display.columns = ["Ticker", "Shares", "Avg Price", "Current Price", "Total Value", "Unrealized P&L"]
+            
+            table_holdings = dash_table.DataTable(
+                data=df_display.to_dict("records"),
+                columns=[{"name": i, "id": i} for i in df_display.columns],
+                style_header={
+                    "backgroundColor": "rgba(26, 26, 46, 0.9)",
+                    "color": COLORS["text_secondary"],
+                    "fontWeight": "bold",
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                },
+                style_cell={
+                    "backgroundColor": "transparent",
+                    "color": COLORS["text"],
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                    "padding": "12px",
+                    "textAlign": "left",
+                },
+                style_data_conditional=[
+                    {
+                        "if": {"column_id": "Unrealized P&L", "filter_query": "{Unrealized P&L} contains '-'"},
+                        "color": COLORS["danger"]
+                    },
+                    {
+                        "if": {"column_id": "Unrealized P&L", "filter_query": "{Unrealized P&L} contains '$'"},
+                        "color": COLORS["success"] # This applies to all positive if '-' is caught above? Wait, '-' also contains '$'. So we put negative condition after? No, data_conditional applies sequentially or overrides.
+                    }
+                ],
+                css=[
+                    {"selector": "tr:hover", "rule": "background-color: rgba(255,255,255,0.1) !important;"}
+                ]
+            )
+            
+        # 2. Fetch Signals
+        df_sig = fetch_signals()
+        table_signals = html.Div("No recent signals generated")
+        
+        if not df_sig.empty:
+            from dash import dash_table
+            df_sig_display = df_sig.copy()
+            df_sig_display["confidence_score"] = df_sig_display["confidence_score"].map(lambda x: f"{x:.1f}%" if pd.notnull(x) else "N/A")
+            df_sig_display["generated_at"] = pd.to_datetime(df_sig_display["generated_at"]).dt.strftime("%Y-%m-%d %H:%M")
+            
+            df_sig_display.columns = ["Ticker", "Signal", "Reason", "Confidence", "Generated At"]
+            
+            table_signals = dash_table.DataTable(
+                data=df_sig_display.to_dict("records"),
+                columns=[{"name": i, "id": i} for i in df_sig_display.columns],
+                style_header={
+                    "backgroundColor": "rgba(26, 26, 46, 0.9)",
+                    "color": COLORS["text_secondary"],
+                    "fontWeight": "bold",
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                },
+                style_cell={
+                    "backgroundColor": "transparent",
+                    "color": COLORS["text"],
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                    "padding": "12px",
+                    "textAlign": "left",
+                },
+                style_data_conditional=[
+                    {
+                        "if": {"column_id": "Signal", "filter_query": "{Signal} = 'BUY'"},
+                        "color": COLORS["success"],
+                        "fontWeight": "bold"
+                    },
+                    {
+                        "if": {"column_id": "Signal", "filter_query": "{Signal} = 'SELL'"},
+                        "color": COLORS["danger"],
+                        "fontWeight": "bold"
+                    },
+                    {
+                        "if": {"column_id": "Signal", "filter_query": "{Signal} = 'HOLD'"},
+                        "color": COLORS["warning"],
+                        "fontWeight": "bold"
+                    }
+                ],
+                css=[
+                    {"selector": "tr:hover", "rule": "background-color: rgba(255,255,255,0.1) !important;"}
+                ]
+            )
+            
+        return summary_children, fig_alloc, table_holdings, table_signals

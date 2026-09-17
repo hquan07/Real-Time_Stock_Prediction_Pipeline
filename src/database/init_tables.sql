@@ -148,11 +148,43 @@ CREATE TABLE public.companies (
     country text,
     exchange text,
     website text,
-    description text
+    description text,
+    is_active boolean DEFAULT true
 );
 
 
 ALTER TABLE public.companies OWNER TO postgres;
+
+-- Watchlist
+CREATE TABLE IF NOT EXISTS public.user_watchlist (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(50) DEFAULT 'default_user',
+    ticker VARCHAR(10) REFERENCES public.companies(ticker),
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, ticker)
+);
+
+-- Portfolio
+CREATE TABLE IF NOT EXISTS public.portfolio (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(50) DEFAULT 'default_user',
+    ticker VARCHAR(10) NOT NULL,
+    shares DECIMAL(10, 2) NOT NULL,
+    avg_price DECIMAL(10, 2) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Signals
+CREATE TABLE IF NOT EXISTS public.signals (
+    id SERIAL PRIMARY KEY,
+    ticker VARCHAR(10) NOT NULL,
+    signal_type VARCHAR(10) NOT NULL, -- BUY, SELL, HOLD
+    reason TEXT,
+    confidence DECIMAL(5, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE public.user_watchlist OWNER TO postgres;
 
 --
 -- Name: dividends; Type: TABLE; Schema: public; Owner: postgres

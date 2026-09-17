@@ -1,0 +1,24 @@
+{
+    "version": "random_forest_v20260916_014616",
+    "model_type": "random_forest",
+    "features": [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "log_return",
+        "ma_5",
+        "ma_10",
+        "volatility_10",
+        "close_lag_1",
+        "close_lag_5",
+        "close_lag_10"
+    ],
+    "metrics": {
+        "train_rmse": 0.3906419191033346,
+        "test_rmse": 0.6261979806617564,
+        "test_mae": 0.4975480787726887
+    },
+    "created_at": "2026-09-16T01:46:16.842520"
+}

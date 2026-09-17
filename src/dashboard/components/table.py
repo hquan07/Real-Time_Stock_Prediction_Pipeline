@@ -55,6 +55,9 @@ def create_stock_table(
                 "backgroundColor": COLORS["background"],
             }
         ],
+        css=[
+            {"selector": "tr:hover", "rule": "background-color: rgba(255,255,255,0.1) !important;"}
+        ]
     )
 
 
@@ -83,6 +86,9 @@ def create_prediction_table(predictions: List[Dict]) -> dash_table.DataTable:
             "textAlign": "center",
             "padding": "8px",
         },
+        css=[
+            {"selector": "tr:hover", "rule": "background-color: rgba(255,255,255,0.1) !important;"}
+        ]
     )
 
 

@@ -11,6 +11,7 @@ from datetime import datetime, date
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from loguru import logger
+import pandas as pd
 
 
 def run_inference(
@@ -74,14 +75,22 @@ def run_inference(
         # Run batch prediction
         df_predictions = batch_predict(
             df,
-            output_column="predicted_close",
+            output_column="predicted_return",
         )
+        
+        # Calculate predicted close from log return
+        df_predictions["predicted_close"] = df_predictions["close"] * np.exp(df_predictions["predicted_return"])
 
         stats["predictions_made"] = len(df_predictions)
 
         # Prepare predictions for database
         if save_predictions:
             predictions = []
+            
+            # Try to get confidence interval from model registry
+            ci_width = 0.0
+            if "metrics" in model_info and "test_rmse" in model_info["metrics"]:
+                ci_width = model_info["metrics"]["test_rmse"] * 1.96
 
             for _, row in df_predictions.iterrows():
                 predictions.append({
@@ -89,8 +98,10 @@ def run_inference(
                     "prediction_date": date.today(),
                     "target_date": date.today(),
                     "model_name": model_type,
-                    "predicted_close": row.get("predicted_close"),
-                    "model_version": "1.0",
+                    "predicted_close": float(row.get("predicted_close")),
+                    "predicted_return": float(row.get("predicted_return")),
+                    "confidence": float(ci_width),
+                    "model_version": model_info.get("version", "1.0"),
                 })
 
             # Save to database

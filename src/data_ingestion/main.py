@@ -64,9 +64,9 @@ def build_stock_message(ticker: str) -> Dict[str, Any]:
             } if earnings else None,
 
             "financials": {
-                "total_revenue": int(financials.get("total_revenue", 0)),
-                "net_income": int(financials.get("net_income", 0)),
-                "operating_income": int(financials.get("operating_income", 0))
+                "total_revenue": int(financials.get("totalRevenue") or financials.get("total_revenue") or 0),
+                "net_income": int(financials.get("netIncome") or financials.get("net_income") or 0),
+                "operating_income": int(financials.get("operatingIncome") or financials.get("operating_income") or 0)
             } if financials else None
         }
 

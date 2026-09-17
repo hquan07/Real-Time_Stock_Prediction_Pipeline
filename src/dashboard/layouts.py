@@ -310,6 +310,7 @@ def create_controls():
                 style={**control_item_style, "marginRight": "0", "marginLeft": "auto"},
             ),
         ],
+        className="dashboard-controls",
         style={
             "display": "flex",
             "alignItems": "center",
@@ -469,6 +470,7 @@ def create_stats_cards():
             create_stat_card("model-accuracy", "Model MAPE", "0%", "🎯", COLORS["accent"], "accuracy-sparkline", "Mean Absolute Percentage Error"),
             create_stat_card("rsi-value", "RSI (14)", "50", "📉", COLORS["text_secondary"], "rsi-sparkline", "Relative Strength Index (14-day)"),
         ],
+        className="stats-grid",
         style={
             "display": "grid",
             "gridTemplateColumns": "repeat(6, 1fr)",
@@ -581,27 +583,34 @@ def create_overview_tab():
                         ],
                         style={"display": "flex", "alignItems": "center", "marginBottom": "8px"},
                     ),
-                    dcc.Graph(
-                        id="price-chart",
-                        config={
-                            "displayModeBar": True,
-                            "scrollZoom": True,
-                            "modeBarButtonsToAdd": [
-                                "drawline",
-                                "drawopenpath",
-                                "drawclosedpath",
-                                "drawrect",
-                                "eraseshape",
-                            ],
-                            "toImageButtonOptions": {
-                                "format": "png",
-                                "filename": "stock_chart",
-                                "height": 800,
-                                "width": 1200,
-                                "scale": 2,
-                            },
-                        },
-                        style={"height": "450px"},
+                    dcc.Loading(
+                        id="loading-price-chart",
+                        type="default",
+                        color=COLORS["primary"],
+                        children=[
+                            dcc.Graph(
+                                id="price-chart",
+                                config={
+                                    "displayModeBar": True,
+                                    "scrollZoom": True,
+                                    "modeBarButtonsToAdd": [
+                                        "drawline",
+                                        "drawopenpath",
+                                        "drawclosedpath",
+                                        "drawrect",
+                                        "eraseshape",
+                                    ],
+                                    "toImageButtonOptions": {
+                                        "format": "png",
+                                        "filename": "stock_chart",
+                                        "height": 800,
+                                        "width": 1200,
+                                        "scale": 2,
+                                    },
+                                },
+                                style={"height": "450px"},
+                            )
+                        ]
                     ),
                 ],
                 style={**GLASS_CARD_STYLE, "position": "relative"},
@@ -611,10 +620,17 @@ def create_overview_tab():
             html.Div(
                 [
                     html.H3(["📊 ", "Trading Volume"], style=HEADER_STYLE),
-                    dcc.Graph(
-                        id="volume-chart",
-                        config={"displayModeBar": False},
-                        style={"height": "180px"},
+                    dcc.Loading(
+                        id="loading-volume-chart",
+                        type="default",
+                        color=COLORS["primary"],
+                        children=[
+                            dcc.Graph(
+                                id="volume-chart",
+                                config={"displayModeBar": False},
+                                style={"height": "180px"},
+                            )
+                        ]
                     ),
                 ],
                 style=GLASS_CARD_STYLE,
@@ -627,29 +643,66 @@ def create_overview_tab():
 def create_technical_tab():
     return html.Div(
         [
-            # RSI Chart
+            # Technical Indicators Row
             html.Div(
-                [
-                    html.H3(["📉 ", "RSI (Relative Strength Index)"], style=HEADER_STYLE),
-                    html.P(
-                        "RSI > 70: Overbought | RSI < 30: Oversold",
-                        style={"color": COLORS["text_muted"], "fontSize": "12px", "marginBottom": "10px"},
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6",
+                children=[
+                    # RSI Chart
+                    html.Div(
+                        [
+                            html.H3(["📉 ", "RSI (Relative Strength Index)"], style=HEADER_STYLE),
+                            html.P(
+                                "RSI > 70: Overbought | RSI < 30: Oversold",
+                                style={"color": COLORS["text_muted"], "fontSize": "12px", "marginBottom": "10px"},
+                            ),
+                            dcc.Graph(id="rsi-chart", config={"displayModeBar": False}, style={"height": "250px"}),
+                        ],
+                        style=GLASS_CARD_STYLE,
                     ),
-                    dcc.Graph(id="rsi-chart", config={"displayModeBar": False}, style={"height": "250px"}),
-                ],
-                style=GLASS_CARD_STYLE,
+                    # MACD Chart
+                    html.Div(
+                        [
+                            html.H3(["📊 ", "MACD (Moving Average Convergence Divergence)"], style=HEADER_STYLE),
+                            html.P(
+                                "MACD crossover signal line = Buy/Sell signal",
+                                style={"color": COLORS["text_muted"], "fontSize": "12px", "marginBottom": "10px"},
+                            ),
+                            dcc.Graph(id="macd-chart", config={"displayModeBar": False}, style={"height": "250px"}),
+                        ],
+                        style=GLASS_CARD_STYLE,
+                    ),
+                ]
             ),
-            # MACD Chart
+            
+            # Risk Analysis Row
             html.Div(
-                [
-                    html.H3(["📊 ", "MACD (Moving Average Convergence Divergence)"], style=HEADER_STYLE),
-                    html.P(
-                        "MACD crossover signal line = Buy/Sell signal",
-                        style={"color": COLORS["text_muted"], "fontSize": "12px", "marginBottom": "10px"},
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6",
+                children=[
+                    # Drawdown Chart
+                    html.Div(
+                        [
+                            html.H3(["📉 ", "Historical Drawdown"], style=HEADER_STYLE),
+                            html.P(
+                                "Percentage drop from historical peak",
+                                style={"color": COLORS["text_muted"], "fontSize": "12px", "marginBottom": "10px"},
+                            ),
+                            dcc.Graph(id="drawdown-chart", config={"displayModeBar": False}, style={"height": "250px"}),
+                        ],
+                        style=GLASS_CARD_STYLE,
                     ),
-                    dcc.Graph(id="macd-chart", config={"displayModeBar": False}, style={"height": "250px"}),
-                ],
-                style=GLASS_CARD_STYLE,
+                    # Returns Distribution
+                    html.Div(
+                        [
+                            html.H3(["📊 ", "Daily Returns Distribution"], style=HEADER_STYLE),
+                            html.P(
+                                "Histogram of daily price changes",
+                                style={"color": COLORS["text_muted"], "fontSize": "12px", "marginBottom": "10px"},
+                            ),
+                            dcc.Graph(id="returns-dist-chart", config={"displayModeBar": False}, style={"height": "250px"}),
+                        ],
+                        style=GLASS_CARD_STYLE,
+                    ),
+                ]
             ),
         ],
     )
@@ -739,6 +792,7 @@ def create_predictions_tab():
                         style={**GLASS_CARD_STYLE, "flex": "1", "marginLeft": "16px"},
                     ),
                 ],
+                className="analytics-grid",
                 style={"display": "flex", "marginBottom": "16px"},
             ),
             # Historical Accuracy Chart Row
@@ -760,6 +814,8 @@ def create_predictions_tab():
         ],
     )
 
+
+from dashboard.pages.portfolio import create_portfolio_tab
 
 # Main Layout with Tabs
 def create_layout():
@@ -811,10 +867,18 @@ def create_layout():
                                 selected_style=TAB_SELECTED_STYLE,
                                 children=create_predictions_tab(),
                             ),
+                            dcc.Tab(
+                                label="💼 Portfolio & Signals",
+                                value="portfolio",
+                                style=TAB_STYLE,
+                                selected_style=TAB_SELECTED_STYLE,
+                                children=create_portfolio_tab(),
+                            ),
                         ],
                         style={"marginBottom": "16px"},
                     ),
                 ],
+                className="dashboard-content",
                 style={"padding": "16px 24px"},
             ),
         ],

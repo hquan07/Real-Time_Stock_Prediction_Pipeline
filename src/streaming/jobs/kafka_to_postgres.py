@@ -28,22 +28,15 @@ DB_NAME = "stockdb"
 DB_USER = "postgres"
 DB_PASSWORD = "Huyquan1607"
 
+import os
+from fastavro import parse_schema
+
 # Avro schema for deserialization
-STOCK_SCHEMA = {
-    "type": "record",
-    "name": "StockData",
-    "fields": [
-        {"name": "ticker", "type": "string"},
-        {"name": "timestamp", "type": "long"},
-        {"name": "open", "type": ["null", "double"], "default": None},
-        {"name": "high", "type": ["null", "double"], "default": None},
-        {"name": "low", "type": ["null", "double"], "default": None},
-        {"name": "close", "type": ["null", "double"], "default": None},
-        {"name": "volume", "type": ["null", "long"], "default": None},
-        {"name": "dividends", "type": ["null", "double"], "default": None},
-        {"name": "stock_splits", "type": ["null", "double"], "default": None},
-    ]
-}
+SCHEMA_PATH = "/home/hquan07/Desktop/Real-Time_Stock_Prediction_Pipeline/src/data_ingestion/schema/stock_schema.avsc"
+with open(SCHEMA_PATH, "r") as f:
+    STOCK_SCHEMA = parse_schema(json.load(f))
+
+
 
 
 def get_db_connection():
@@ -83,12 +76,12 @@ def write_to_db(conn, stock_data: dict):
             ON CONFLICT (ticker) DO NOTHING
         """, (ticker, ticker))
         
-        # Insert price history
+        # Insert into stock_prices_stream
         insert_sql = """
-            INSERT INTO price_history 
-            (ticker, date, open, high, low, close, volume)
+            INSERT INTO stock_prices_stream 
+            (ticker, event_time, open, high, low, close, volume)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (ticker, date) DO UPDATE SET
+            ON CONFLICT (ticker, event_time) DO UPDATE SET
                 open = EXCLUDED.open,
                 high = EXCLUDED.high,
                 low = EXCLUDED.low,
@@ -96,14 +89,16 @@ def write_to_db(conn, stock_data: dict):
                 volume = EXCLUDED.volume
         """
         
+        price_data = stock_data.get('price') or {}
+        
         cur.execute(insert_sql, (
             ticker,
-            ts.date(),
-            stock_data.get('open'),
-            stock_data.get('high'),
-            stock_data.get('low'),
-            stock_data.get('close'),
-            stock_data.get('volume')
+            ts,
+            price_data.get('open'),
+            price_data.get('high'),
+            price_data.get('low'),
+            price_data.get('close'),
+            price_data.get('volume')
         ))
         
         conn.commit()
