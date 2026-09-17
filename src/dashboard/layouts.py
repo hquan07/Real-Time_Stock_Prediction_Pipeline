@@ -310,6 +310,7 @@ def create_controls():
                 style={**control_item_style, "marginRight": "0", "marginLeft": "auto"},
             ),
         ],
+        className="dashboard-controls",
         style={
             "display": "flex",
             "alignItems": "center",
@@ -469,6 +470,7 @@ def create_stats_cards():
             create_stat_card("model-accuracy", "Model MAPE", "0%", "🎯", COLORS["accent"], "accuracy-sparkline", "Mean Absolute Percentage Error"),
             create_stat_card("rsi-value", "RSI (14)", "50", "📉", COLORS["text_secondary"], "rsi-sparkline", "Relative Strength Index (14-day)"),
         ],
+        className="stats-grid",
         style={
             "display": "grid",
             "gridTemplateColumns": "repeat(6, 1fr)",
@@ -790,6 +792,7 @@ def create_predictions_tab():
                         style={**GLASS_CARD_STYLE, "flex": "1", "marginLeft": "16px"},
                     ),
                 ],
+                className="analytics-grid",
                 style={"display": "flex", "marginBottom": "16px"},
             ),
             # Historical Accuracy Chart Row
@@ -811,6 +814,8 @@ def create_predictions_tab():
         ],
     )
 
+
+from dashboard.pages.portfolio import create_portfolio_tab
 
 # Main Layout with Tabs
 def create_layout():
@@ -862,10 +867,18 @@ def create_layout():
                                 selected_style=TAB_SELECTED_STYLE,
                                 children=create_predictions_tab(),
                             ),
+                            dcc.Tab(
+                                label="💼 Portfolio & Signals",
+                                value="portfolio",
+                                style=TAB_STYLE,
+                                selected_style=TAB_SELECTED_STYLE,
+                                children=create_portfolio_tab(),
+                            ),
                         ],
                         style={"marginBottom": "16px"},
                     ),
                 ],
+                className="dashboard-content",
                 style={"padding": "16px 24px"},
             ),
         ],

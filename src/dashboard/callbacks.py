@@ -12,8 +12,9 @@ from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 from loguru import logger
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Add src and project root to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 try:
     import torch
@@ -25,6 +26,7 @@ except ImportError:
 COLORS = {
     "background": "#0f0f1a",
     "card": "rgba(26, 26, 46, 0.8)",
+    "card_border": "rgba(255, 255, 255, 0.1)",
     "primary": "#6366f1",
     "secondary": "#8b5cf6",
     "accent": "#f43f5e",
@@ -67,6 +69,7 @@ def fetch_stock_data(ticker: str, period: str = "3mo") -> pd.DataFrame:
         conn.close()
         
         if not df.empty:
+            df = df.drop_duplicates(subset=['date'], keep='last').reset_index(drop=True)
             logger.info(f"📊 Loaded {len(df)} records for {ticker}")
             return df
     except psycopg2.Error as e:
@@ -115,6 +118,60 @@ def get_user_watchlist(user_id: str = "default_user") -> list:
         if conn:
             conn.close()
 
+def fetch_portfolio(user_id: str = "default_user") -> pd.DataFrame:
+    """Fetch portfolio data for a user."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = """
+            WITH LatestPrices AS (
+                SELECT ticker, close as current_price
+                FROM (
+                    SELECT ticker, close, ROW_NUMBER() OVER(PARTITION BY ticker ORDER BY event_time DESC) as rn
+                    FROM stock_prices_stream
+                ) tmp
+                WHERE rn = 1
+            )
+            SELECT 
+                p.ticker,
+                p.shares as quantity,
+                p.avg_price as average_price,
+                COALESCE(lp.current_price, p.avg_price) as current_price
+            FROM portfolio p
+            LEFT JOIN LatestPrices lp ON p.ticker = lp.ticker
+            WHERE p.user_id = %s
+        """
+        df = pd.read_sql_query(query, conn, params=(user_id,))
+        if not df.empty:
+            df["quantity"] = pd.to_numeric(df["quantity"], errors='coerce')
+            df["average_price"] = pd.to_numeric(df["average_price"], errors='coerce')
+            df["current_price"] = pd.to_numeric(df["current_price"], errors='coerce')
+            df["total_cost"] = df["quantity"] * df["average_price"]
+            df["total_value"] = df["quantity"] * df["current_price"]
+            df["unrealized_pnl"] = df["total_value"] - df["total_cost"]
+        return df
+    except Exception as e:
+        logger.error(f"Failed to fetch portfolio: {e}")
+        return pd.DataFrame()
+    finally:
+        if conn:
+            conn.close()
+
+def fetch_signals(limit: int = 20) -> pd.DataFrame:
+    """Fetch recent trading signals."""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        query = "SELECT ticker, signal_type, reason, confidence as confidence_score, created_at as generated_at FROM signals ORDER BY created_at DESC LIMIT %s"
+        df = pd.read_sql_query(query, conn, params=(limit,))
+        return df
+    except Exception as e:
+        logger.error(f"Failed to fetch signals: {e}")
+        return pd.DataFrame()
+    finally:
+        if conn:
+            conn.close()
+
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
@@ -123,14 +180,14 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     
     # Moving Averages
-    df['ma5'] = df['close'].rolling(window=5).mean()
-    df['ma20'] = df['close'].rolling(window=20).mean()
-    df['ma50'] = df['close'].rolling(window=50).mean()
+    df['ma5'] = df['close'].rolling(window=5, min_periods=1).mean()
+    df['ma20'] = df['close'].rolling(window=20, min_periods=1).mean()
+    df['ma50'] = df['close'].rolling(window=50, min_periods=1).mean()
     
     # RSI
     delta = df['close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14, min_periods=1).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14, min_periods=1).mean()
     rs = gain / loss
     df['rsi'] = 100 - (100 / (1 + rs))
     
@@ -142,24 +199,25 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df['macd_hist'] = df['macd'] - df['macd_signal']
     
     # Bollinger Bands
-    df['bb_middle'] = df['close'].rolling(window=20).mean()
-    rolling_std = df['close'].rolling(window=20).std()
+    df['bb_middle'] = df['close'].rolling(window=20, min_periods=1).mean()
+    rolling_std = df['close'].rolling(window=20, min_periods=1).std().fillna(0)
     df['bb_upper'] = df['bb_middle'] + (rolling_std * 2)
     df['bb_lower'] = df['bb_middle'] - (rolling_std * 2)
     
     # Volume ratio
-    df['volume_ratio'] = df['volume'] / df['volume'].rolling(window=20).mean()
+    df['volume_ratio'] = df['volume'] / df['volume'].rolling(window=20, min_periods=1).mean().replace(0, 1)
     
     # Price change
-    df['price_change'] = df['close'].pct_change()
+    df['price_change'] = df['close'].pct_change().fillna(0)
     
+    df = df.fillna(0)
     return df
 
 
 def predict_with_rf(ticker: str, df: pd.DataFrame) -> Tuple[float, float, float]:
     """Make prediction using latest model from registry."""
     try:
-        from src.machine_learning.model_registry import ModelRegistry
+        from machine_learning.model_registry import ModelRegistry
         model, scaler, metadata = ModelRegistry.load_latest_model()
     except Exception as e:
         logger.error(f"Could not load model from registry: {e}")
@@ -174,7 +232,6 @@ def predict_with_rf(ticker: str, df: pd.DataFrame) -> Tuple[float, float, float]
         
     feature_cols = metadata.get("features", [])
     
-    # Use available features
     if feature_cols:
         available_cols = [c for c in feature_cols if c in df_features.columns]
         if len(available_cols) < len(feature_cols):
@@ -183,16 +240,25 @@ def predict_with_rf(ticker: str, df: pd.DataFrame) -> Tuple[float, float, float]
                 if c not in df_features.columns:
                     df_features[c] = df_features['close']
         
-        X = df_features[feature_cols].iloc[-1:].values
+        X = df_features[feature_cols].iloc[-1:].copy()
     else:
         # Fallback
         numeric_cols = df_features.select_dtypes(include=[np.number]).columns
-        X = df_features[numeric_cols].iloc[-1:].values
+        X = df_features[numeric_cols].iloc[-1:].copy()
         
     if scaler is not None:
+        if hasattr(scaler, "feature_names") and scaler.feature_names:
+            for c in scaler.feature_names:
+                if c not in X.columns:
+                    X[c] = 0.0
         X = scaler.transform(X)
         
+        # The scaler might have been trained on target as well, but model only expects feature_cols
+        if feature_cols:
+            X = X[feature_cols].copy()
+            
     # Model predicts log_return
+
     pred_return = float(model.predict(X)[0])
     last_close = float(df_features['close'].iloc[-1])
     
@@ -513,6 +579,12 @@ def register_callbacks(app):
             font=dict(color=COLORS["text"]),
             xaxis_rangeslider_visible=False,
             hovermode="x unified",
+            hoverlabel=dict(
+                bgcolor=COLORS["card"],
+                font_color=COLORS["text"],
+                bordercolor=COLORS["card_border"],
+                font_size=14
+            ),
             legend=dict(orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5),
             margin=dict(l=0, r=0, t=10, b=0),
         )
@@ -862,6 +934,12 @@ def register_callbacks(app):
             margin=dict(l=0, r=0, t=10, b=0),
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
             hovermode="x unified",
+            hoverlabel=dict(
+                bgcolor=COLORS["card"],
+                font_color=COLORS["text"],
+                bordercolor=COLORS["card_border"],
+                font_size=12
+            ),
         )
         
         return fig
@@ -921,6 +999,12 @@ def register_callbacks(app):
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
             yaxis_title="MAPE %",
             hovermode="x unified",
+            hoverlabel=dict(
+                bgcolor=COLORS["card"],
+                font_color=COLORS["text"],
+                bordercolor=COLORS["card_border"],
+                font_size=12
+            ),
         )
         
         return fig
@@ -933,3 +1017,165 @@ def register_callbacks(app):
     def update_time(n_intervals):
         now = datetime.now().strftime("%H:%M:%S")
         return f"Updated: {now}"
+
+    # Portfolio callbacks
+    @app.callback(
+        [
+            Output("portfolio-summary", "children"),
+            Output("asset-allocation-chart", "figure"),
+            Output("portfolio-holdings-table", "children"),
+            Output("signals-table", "children"),
+        ],
+        [Input("dashboard-tabs", "value"), Input("interval-component", "n_intervals")],
+    )
+    def update_portfolio_tab(tab, n_intervals):
+        if tab != "portfolio":
+            raise PreventUpdate
+            
+        # 1. Fetch Portfolio
+        df_port = fetch_portfolio()
+        
+        summary_children = []
+        fig_alloc = go.Figure()
+        table_holdings = html.Div("No portfolio data")
+        
+        if not df_port.empty:
+            total_value = df_port["total_value"].sum()
+            total_cost = df_port["total_cost"].sum()
+            total_pnl = df_port["unrealized_pnl"].sum()
+            pnl_pct = (total_pnl / total_cost * 100) if total_cost > 0 else 0
+            
+            # Create summary cards
+            summary_children = [
+                html.Div([
+                    html.H4("Total Value", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"${total_value:,.2f}", style={"color": COLORS["text"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(99, 102, 241, 0.1)", "borderRadius": "12px"}),
+                html.Div([
+                    html.H4("Total P&L", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"${total_pnl:,.2f}", style={"color": COLORS["success"] if total_pnl >= 0 else COLORS["danger"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(16, 185, 129, 0.1)" if total_pnl >= 0 else "rgba(239, 68, 68, 0.1)", "borderRadius": "12px"}),
+                html.Div([
+                    html.H4("P&L %", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"{pnl_pct:,.2f}%", style={"color": COLORS["success"] if pnl_pct >= 0 else COLORS["danger"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(16, 185, 129, 0.1)" if pnl_pct >= 0 else "rgba(239, 68, 68, 0.1)", "borderRadius": "12px"}),
+                html.Div([
+                    html.H4("Positions", style={"color": COLORS["text_muted"], "fontSize": "12px", "margin": "0 0 8px 0"}),
+                    html.Div(f"{len(df_port)}", style={"color": COLORS["text"], "fontSize": "24px", "fontWeight": "bold"})
+                ], style={"padding": "16px", "backgroundColor": "rgba(255, 255, 255, 0.05)", "borderRadius": "12px"})
+            ]
+            
+            # Create Pie Chart
+            fig_alloc.add_trace(go.Pie(
+                labels=df_port["ticker"],
+                values=df_port["total_value"],
+                hole=0.6,
+                marker=dict(colors=[COLORS["primary"], COLORS["secondary"], COLORS["accent"], COLORS["success"], COLORS["warning"]]),
+                textinfo="label+percent",
+                hoverinfo="label+value+percent",
+            ))
+            fig_alloc.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                margin=dict(t=20, b=20, l=20, r=20),
+                showlegend=False
+            )
+            
+            # Create Holdings Table
+            from dash import dash_table
+            
+            # Format dataframe for display
+            df_display = df_port[["ticker", "quantity", "average_price", "current_price", "total_value", "unrealized_pnl"]].copy()
+            df_display["quantity"] = df_display["quantity"].map(lambda x: f"{x:,.0f}")
+            for col in ["average_price", "current_price", "total_value", "unrealized_pnl"]:
+                df_display[col] = df_display[col].map(lambda x: f"${x:,.2f}")
+                
+            df_display.columns = ["Ticker", "Shares", "Avg Price", "Current Price", "Total Value", "Unrealized P&L"]
+            
+            table_holdings = dash_table.DataTable(
+                data=df_display.to_dict("records"),
+                columns=[{"name": i, "id": i} for i in df_display.columns],
+                style_header={
+                    "backgroundColor": "rgba(26, 26, 46, 0.9)",
+                    "color": COLORS["text_secondary"],
+                    "fontWeight": "bold",
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                },
+                style_cell={
+                    "backgroundColor": "transparent",
+                    "color": COLORS["text"],
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                    "padding": "12px",
+                    "textAlign": "left",
+                },
+                style_data_conditional=[
+                    {
+                        "if": {"column_id": "Unrealized P&L", "filter_query": "{Unrealized P&L} contains '-'"},
+                        "color": COLORS["danger"]
+                    },
+                    {
+                        "if": {"column_id": "Unrealized P&L", "filter_query": "{Unrealized P&L} contains '$'"},
+                        "color": COLORS["success"] # This applies to all positive if '-' is caught above? Wait, '-' also contains '$'. So we put negative condition after? No, data_conditional applies sequentially or overrides.
+                    }
+                ],
+                css=[
+                    {"selector": "tr:hover", "rule": "background-color: rgba(255,255,255,0.1) !important;"}
+                ]
+            )
+            
+        # 2. Fetch Signals
+        df_sig = fetch_signals()
+        table_signals = html.Div("No recent signals generated")
+        
+        if not df_sig.empty:
+            from dash import dash_table
+            df_sig_display = df_sig.copy()
+            df_sig_display["confidence_score"] = df_sig_display["confidence_score"].map(lambda x: f"{x:.1f}%" if pd.notnull(x) else "N/A")
+            df_sig_display["generated_at"] = pd.to_datetime(df_sig_display["generated_at"]).dt.strftime("%Y-%m-%d %H:%M")
+            
+            df_sig_display.columns = ["Ticker", "Signal", "Reason", "Confidence", "Generated At"]
+            
+            table_signals = dash_table.DataTable(
+                data=df_sig_display.to_dict("records"),
+                columns=[{"name": i, "id": i} for i in df_sig_display.columns],
+                style_header={
+                    "backgroundColor": "rgba(26, 26, 46, 0.9)",
+                    "color": COLORS["text_secondary"],
+                    "fontWeight": "bold",
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                },
+                style_cell={
+                    "backgroundColor": "transparent",
+                    "color": COLORS["text"],
+                    "border": "none",
+                    "borderBottom": f"1px solid {COLORS['card_border']}",
+                    "padding": "12px",
+                    "textAlign": "left",
+                },
+                style_data_conditional=[
+                    {
+                        "if": {"column_id": "Signal", "filter_query": "{Signal} = 'BUY'"},
+                        "color": COLORS["success"],
+                        "fontWeight": "bold"
+                    },
+                    {
+                        "if": {"column_id": "Signal", "filter_query": "{Signal} = 'SELL'"},
+                        "color": COLORS["danger"],
+                        "fontWeight": "bold"
+                    },
+                    {
+                        "if": {"column_id": "Signal", "filter_query": "{Signal} = 'HOLD'"},
+                        "color": COLORS["warning"],
+                        "fontWeight": "bold"
+                    }
+                ],
+                css=[
+                    {"selector": "tr:hover", "rule": "background-color: rgba(255,255,255,0.1) !important;"}
+                ]
+            )
+            
+        return summary_children, fig_alloc, table_holdings, table_signals

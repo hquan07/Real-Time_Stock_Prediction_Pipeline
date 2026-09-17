@@ -132,12 +132,19 @@ python src/data_ingestion/main.py
 # Run dashboard
 python src/dashboard/app.py
 
-# Train models
+# Train models & register to Model Registry
 python airflow/scripts/run_train.py --model random_forest
 
-# Run inference
+# Generate trading signals (uses latest model from Registry)
+python scripts/signal_generator.py
+
+# Run inference stream
 python airflow/scripts/run_inference.py
 ```
+
+### 6. MLOps & Signals Generation
+- **Model Registry:** Trained models are automatically saved in `src/machine_learning/artifacts/registry`. The signal generator will always fetch the `latest` model version from here.
+- **Signal Generator:** Calculates RSI and fetches predictions from the model to insert BUY/SELL/HOLD signals into the database. Airflow schedules this via `dags/signal_generation_dag.py`.
 
 ## 📊 Dashboard
 

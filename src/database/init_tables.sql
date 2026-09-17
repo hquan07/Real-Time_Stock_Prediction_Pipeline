@@ -155,12 +155,33 @@ CREATE TABLE public.companies (
 
 ALTER TABLE public.companies OWNER TO postgres;
 
-CREATE TABLE public.user_watchlist (
-    id BIGSERIAL PRIMARY KEY,
+-- Watchlist
+CREATE TABLE IF NOT EXISTS public.user_watchlist (
+    id SERIAL PRIMARY KEY,
     user_id VARCHAR(50) DEFAULT 'default_user',
-    ticker VARCHAR(20) REFERENCES public.companies(ticker),
+    ticker VARCHAR(10) REFERENCES public.companies(ticker),
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, ticker)
+);
+
+-- Portfolio
+CREATE TABLE IF NOT EXISTS public.portfolio (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(50) DEFAULT 'default_user',
+    ticker VARCHAR(10) NOT NULL,
+    shares DECIMAL(10, 2) NOT NULL,
+    avg_price DECIMAL(10, 2) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Signals
+CREATE TABLE IF NOT EXISTS public.signals (
+    id SERIAL PRIMARY KEY,
+    ticker VARCHAR(10) NOT NULL,
+    signal_type VARCHAR(10) NOT NULL, -- BUY, SELL, HOLD
+    reason TEXT,
+    confidence DECIMAL(5, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE public.user_watchlist OWNER TO postgres;

@@ -164,13 +164,17 @@ class InferenceEngine:
                 missing = set(self.feature_columns) - set(data.columns)
                 if missing:
                     raise ValueError(f"Missing required features: {missing}")
+                
+                # Apply scaling if available
+                if self.scaler is not None:
+                    if type(self.scaler).__name__ == "DataScaler":
+                        data = self.scaler.transform(data)
+                    else:
+                        data[self.feature_columns] = self.scaler.transform(data[self.feature_columns])
+                        
                 data = data[self.feature_columns].values
             else:
                 data = data.select_dtypes(include=[np.number]).values
-
-        # Apply scaling if available
-        if self.scaler is not None:
-            data = self.scaler.transform(data)
 
         return data
 
@@ -299,7 +303,8 @@ def predict_next_price(
         }
 
     except Exception as e:
-        logger.error(f"❌ Prediction failed for {ticker}: {e}")
+        import traceback
+        logger.error(f"❌ Prediction failed for {ticker}: {e}\n{traceback.format_exc()}")
         return {
             "ticker": ticker,
             "predicted_return": None,
