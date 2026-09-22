@@ -16,31 +16,28 @@ RUN apt-get update && apt-get install -y \
 
 # ------------------------------------------
 # Copy requirements
-COPY requirements-dashboard.txt /app/requirements.txt
+COPY src/dashboard/backend/requirements.txt /app/requirements.txt
 COPY requirements-base.txt /app/requirements-base.txt
 
 # ------------------------------------------
 # Install Python packages
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir psycopg2-binary pandas loguru
 
 # ------------------------------------------
 # Copy source code
 COPY src /app/src
 
 # ------------------------------------------
-# Copy startup script
-COPY docker/app/start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-
-# ------------------------------------------
 # Set Python path
 ENV PYTHONPATH="/app/src"
 
 # ------------------------------------------
-# Expose port (useful for dashboard/API)
+# Expose port
 EXPOSE 8000
 
 # ------------------------------------------
 # Default command
-CMD ["./start.sh"]
+WORKDIR /app/src/dashboard/backend
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
