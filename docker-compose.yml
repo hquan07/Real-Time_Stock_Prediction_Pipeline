@@ -187,6 +187,37 @@ services:
     restart: always
 
   # ---------------------------
+  # MLFLOW (Model Tracking & Registry)
+  # ---------------------------
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.10.2
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    command: mlflow server --backend-store-uri postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} --default-artifact-root /mlflow/artifacts --host 0.0.0.0 --port 5000
+    volumes:
+      - mlflow_data:/mlflow/artifacts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+
+  # ---------------------------
+  # REDIS (Caching)
+  # ---------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  # ---------------------------
   # Dashboard Backend (FastAPI)
   # ---------------------------
   dashboard-backend:
@@ -232,3 +263,4 @@ volumes:
   pgadmin_data:
   redis_data:
   kafka_data:
+  mlflow_data:

@@ -1,6 +1,5 @@
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import asyncpg
 from loguru import logger
 
 DB_CONFIG = {
@@ -11,10 +10,10 @@ DB_CONFIG = {
     "password": os.getenv("POSTGRES_PASSWORD", "Huyquan1607")
 }
 
-def get_db_connection():
+async def get_db_pool():
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
-        return conn
-    except psycopg2.Error as e:
-        logger.error(f"Failed to connect to Database: {e}")
+        pool = await asyncpg.create_pool(**DB_CONFIG, min_size=1, max_size=10)
+        return pool
+    except Exception as e:
+        logger.error(f"Failed to create asyncpg pool: {e}")
         return None

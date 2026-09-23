@@ -24,11 +24,19 @@ def add_target(df: pd.DataFrame) -> pd.DataFrame:
     df["target_return"] = df["log_return"].shift(-1)
     return df
 
-def build_features(df: pd.DataFrame) -> pd.DataFrame:
+def build_features(df: pd.DataFrame, is_training: bool = False) -> pd.DataFrame:
     df = add_return_features(df)
     df = add_rolling_features(df)
     df = add_lag_features(df)
     df = add_target(df)
 
-    df = df.dropna()
+    if is_training:
+        df = df.dropna()
+    else:
+        # For real-time, target_return will be NaN for the latest row. 
+        # We only drop rows that have NaN in features (e.g. the first 10 rows due to lag_10).
+        # We can drop subset of feature columns.
+        feature_cols = [c for c in df.columns if c not in ['target_return', 'date', 'ticker', 'event_time']]
+        df = df.dropna(subset=feature_cols)
+        
     return df

@@ -4,6 +4,7 @@ import DashboardTab from './components/DashboardTab';
 import PortfolioTab from './components/PortfolioTab';
 import TechnicalTab from './components/TechnicalTab';
 import PredictionsTab from './components/PredictionsTab';
+import PriceAlertsTab from './components/PriceAlertsTab';
 
 function App() {
   const [activeTab, setActiveTab] = useState('architecture');
@@ -60,6 +61,15 @@ function App() {
             Portfolio
           </button>
           <button 
+            onClick={() => setActiveTab('alerts')}
+            style={{ 
+              padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s',
+              background: activeTab === 'alerts' ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+              color: activeTab === 'alerts' ? '#6366f1' : '#94a3b8'
+            }}>
+            Price Alerts
+          </button>
+          <button 
             onClick={() => setActiveTab('architecture')}
             style={{ 
               padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s',
@@ -78,6 +88,7 @@ function App() {
         {activeTab === 'portfolio' && <PortfolioTab />}
         {activeTab === 'technical' && <TechnicalTab />}
         {activeTab === 'predictions' && <PredictionsTab />}
+        {activeTab === 'alerts' && <PriceAlertsTab />}
       </main>
     </div>
   );

@@ -186,6 +186,26 @@ def train_single_model(
         }
     }
     
+    try:
+        import mlflow
+        import mlflow.sklearn
+        mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000"))
+        mlflow.set_experiment("Stock_Prediction")
+        
+        with mlflow.start_run():
+            mlflow.log_param("model_type", model_type)
+            mlflow.log_params(model_params)
+            
+            mlflow.log_metric("train_rmse", train_rmse)
+            mlflow.log_metric("train_mae", train_mae)
+            
+            mlflow.sklearn.log_model(model, "model")
+            logger.info("✅ Logged model to MLflow")
+    except ImportError:
+        logger.warning("MLflow not installed, skipping tracking")
+    except Exception as e:
+        logger.warning(f"MLflow tracking failed: {e}")
+    
     if save_model:
         if model_path is None:
             os.makedirs(MODEL_DIR, exist_ok=True)

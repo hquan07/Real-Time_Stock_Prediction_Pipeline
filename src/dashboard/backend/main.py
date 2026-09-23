@@ -7,12 +7,40 @@ from loguru import logger
 # Add project root to path for imports if needed
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+from contextlib import asynccontextmanager
+import asyncio
 from api.routes import router
+from api.ws import router as ws_router, consume_kafka
+from core.database import get_db_pool
+from services.redis_cache import redis_client
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Setup Async Database Pool
+    app.state.pool = await get_db_pool()
+    if app.state.pool:
+        logger.info("✅ Async Database Pool created")
+    else:
+        logger.warning("⚠️ Failed to create Database Pool")
+
+    # Start Kafka consumer background task
+    task = asyncio.create_task(consume_kafka())
+    yield
+    # Cancel task on shutdown
+    task.cancel()
+    
+    # Close resources
+    if app.state.pool:
+        await app.state.pool.close()
+        logger.info("🛑 Database Pool closed")
+    await redis_client.close()
+    logger.info("🛑 Redis connection closed")
 
 app = FastAPI(
     title="Real-Time Stock Prediction API",
     description="Backend for the React/Vite Dashboard",
     version="1.0.0",
+    lifespan=lifespan
 )
 
 # Configure CORS for Frontend
@@ -25,6 +53,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+app.include_router(ws_router, prefix="/api/ws")
 
 @app.get("/health")
 def health_check():

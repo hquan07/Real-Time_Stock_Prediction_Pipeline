@@ -1,50 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import useStore from '../store/useStore';
 import StatCard from './StatCard';
 import PriceChart from './PriceChart';
 
 const DashboardTab = () => {
-  const [tickers, setTickers] = useState([]);
-  const [selectedTicker, setSelectedTicker] = useState('AAPL');
-  const [stockData, setStockData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { 
+    tickers, 
+    selectedTicker, 
+    setSelectedTicker, 
+    historicalData, 
+    isLoadingHistorical, 
+    fetchTickers, 
+    fetchHistoricalData,
+    historicalPeriod
+  } = useStore();
 
-  // Fetch Tickers
+  const [realtimeData, setRealtimeData] = useState([]);
+
+  // Initial load
   useEffect(() => {
-    axios.get('http://localhost:8000/api/tickers')
-      .then(res => setTickers(res.data))
-      .catch(err => console.error(err));
-  }, []);
+    fetchTickers();
+  }, [fetchTickers]);
 
-  // Fetch Stock Data
-  const fetchStockData = () => {
-    if (!selectedTicker) return;
-    axios.get(`http://localhost:8000/api/stock/${selectedTicker}?period=6M`)
-      .then(res => {
-        setStockData(res.data);
-        if (loading) setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        if (loading) setLoading(false);
-      });
-  };
-
+  // Fetch historical data on ticker/period change
   useEffect(() => {
-    setLoading(true);
-    fetchStockData();
+    if (selectedTicker) {
+      fetchHistoricalData(selectedTicker, historicalPeriod);
+      setRealtimeData([]); // Reset realtime append data
+    }
+  }, [selectedTicker, historicalPeriod, fetchHistoricalData]);
+
+  // WebSocket for Realtime ticks
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8000/api/ws/stream');
     
-    // Auto-refresh every 10 seconds for real-time data
-    const interval = setInterval(() => {
-      fetchStockData();
-    }, 10000);
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'tick' && data.ticker === selectedTicker) {
+        setRealtimeData(prev => {
+          const newData = [...prev];
+          
+          // Get last known RSI/MACD from historical or previous real-time
+          let lastRSI = 0;
+          let lastMACD = 0;
+          
+          if (newData.length > 0) {
+            lastRSI = newData[newData.length - 1].rsi || 0;
+            lastMACD = newData[newData.length - 1].macd || 0;
+          } else if (historicalData.length > 0) {
+            lastRSI = historicalData[historicalData.length - 1].rsi || 0;
+            lastMACD = historicalData[historicalData.length - 1].macd || 0;
+          }
+          
+          newData.push({
+            date: new Date(data.timestamp).toISOString(),
+            close: data.price,
+            open: data.price,
+            high: data.price,
+            low: data.price,
+            volume: 0,
+            rsi: lastRSI,
+            macd: lastMACD
+          });
+          
+          // Keep only last 100 realtime ticks in memory to avoid bloat
+          if (newData.length > 100) newData.shift();
+          
+          return newData;
+        });
+      }
+    };
     
-    return () => clearInterval(interval);
-  }, [selectedTicker]);
+    return () => {
+      ws.close();
+    };
+  }, [selectedTicker, historicalData]);
+
+  // Combine historical and real-time data for the chart
+  const combinedData = [...historicalData, ...realtimeData];
 
   // Calculate stats from latest data
-  const latest = stockData.length > 0 ? stockData[stockData.length - 1] : null;
-  const previous = stockData.length > 1 ? stockData[stockData.length - 2] : null;
+  const latest = combinedData.length > 0 ? combinedData[combinedData.length - 1] : null;
+  const previous = combinedData.length > 1 ? combinedData[combinedData.length - 2] : null;
   
   const currentPrice = latest ? latest.close : 0;
   const dailyChange = latest && previous ? ((latest.close - previous.close) / previous.close) * 100 : 0;
@@ -76,17 +113,17 @@ const DashboardTab = () => {
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
         <StatCard title="Current Price" value={currentPrice.toFixed(2)} prefix="$" change={dailyChange} />
         <StatCard title="Trading Volume" value={(currentVolume / 1000000).toFixed(2)} suffix="M" />
-        <StatCard title="RSI (14d)" value={currentRSI.toFixed(2)} change={currentRSI - 50} />
+        <StatCard title="RSI (14d)" value={currentRSI ? currentRSI.toFixed(2) : "0.00"} change={currentRSI - 50} />
       </div>
 
       {/* Main Chart Area */}
       <div style={{ height: '600px' }}>
-        {loading ? (
+        {isLoadingHistorical && combinedData.length === 0 ? (
           <div className="glass-card" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ color: '#6366f1', fontSize: '20px', fontWeight: 500, animation: 'pulse 1.5s infinite' }}>Loading Data...</div>
           </div>
         ) : (
-          <PriceChart data={stockData} ticker={selectedTicker} />
+          <PriceChart data={combinedData} ticker={selectedTicker} />
         )}
       </div>
     </div>

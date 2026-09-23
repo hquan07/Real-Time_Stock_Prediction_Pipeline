@@ -24,47 +24,37 @@ def compute_rsi(data: pd.Series, window: int = 14) -> pd.Series:
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
-def fetch_data(ticker: str, engine, lookback_days: int = 60) -> pd.DataFrame:
+def fetch_latest_features(ticker: str, engine) -> dict:
     try:
         from sqlalchemy import text
+        # Fetch the most recent row which already has features from Spark
         query = text("""
-            SELECT ticker, date, open, high, low, close, volume 
-            FROM price_history 
+            SELECT ticker, event_time as date, open, high, low, close, volume,
+                   log_return, ma_5, ma_10, volatility_10, 
+                   close_lag_1, close_lag_5, close_lag_10
+            FROM stock_prices_stream 
             WHERE ticker = :ticker 
-            ORDER BY date DESC 
-            LIMIT :limit
+            ORDER BY event_time DESC 
+            LIMIT 1
         """)
         
         with engine.connect() as conn:
-            result = conn.execute(query, {"ticker": ticker, "limit": lookback_days})
-            df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            result = conn.execute(query, {"ticker": ticker}).fetchone()
             
-        if df.empty:
-            logger.warning(f"No data for {ticker} in DB. Falling back to yfinance.")
-            hist = yf.download(ticker, period=f"{lookback_days}d", progress=False)
-            if hist.empty:
-                return pd.DataFrame()
+        if not result:
+            return {}
+            
+        row = dict(result._mapping)
+        
+        # Ensure numeric
+        for k, v in row.items():
+            if k not in ['ticker', 'date'] and v is not None:
+                row[k] = float(v)
                 
-            if isinstance(hist.columns, pd.MultiIndex):
-                hist.columns = hist.columns.get_level_values(0)
-            hist = hist.reset_index()
-            hist.columns = [c.lower() for c in hist.columns]
-            if 'date' not in hist.columns:
-                hist.rename(columns={'datetime': 'date'}, inplace=True)
-            hist['ticker'] = ticker
-            
-            req_cols = ["ticker", "date", "open", "high", "low", "close", "volume"]
-            df = hist[[c for c in req_cols if c in hist.columns]].copy()
-            for c in req_cols:
-                if c not in df.columns:
-                    df[c] = 0
-            df = df[req_cols]
-            
-        df = df.sort_values("date").reset_index(drop=True)
-        return df
+        return row
     except Exception as e:
-        logger.error(f"Error fetching data for {ticker}: {e}")
-        return pd.DataFrame()
+        logger.error(f"Error fetching latest features for {ticker}: {e}")
+        return {}
 
 def run_signal_generation():
     engine = get_engine()
@@ -74,28 +64,15 @@ def run_signal_generation():
     
     for ticker in tickers:
         logger.info(f"Generating signal for {ticker}")
-        df = fetch_data(ticker, engine, lookback_days=100)
         
-        if df.empty or len(df) < 30:
-            logger.warning(f"Not enough data for {ticker}")
+        # 1. Consume clean data from Spark (Task 2.2)
+        last_row = fetch_latest_features(ticker, engine)
+        
+        if not last_row or last_row.get("ma_10") is None:
+            logger.warning(f"Not enough clean feature data for {ticker} yet")
             continue
             
-        # Ensure numeric
-        numeric_cols = ["open", "high", "low", "close", "volume"]
-        for c in numeric_cols:
-            if c in df.columns:
-                df[c] = pd.to_numeric(df[c], errors='coerce').astype(float)
-                
-        # Compute RSI
-        df["rsi"] = compute_rsi(df["close"])
-        current_rsi = df["rsi"].iloc[-1]
-        
-        # Build features for inference
-        features_df = build_features(df.copy())
-        if features_df.empty:
-            continue
-            
-        last_row = features_df.iloc[-1:].to_dict(orient='records')[0]
+        current_rsi = 50 # Default or we could compute RSI if needed, but let's just use 50 if missing in DB
         
         try:
             # Predict

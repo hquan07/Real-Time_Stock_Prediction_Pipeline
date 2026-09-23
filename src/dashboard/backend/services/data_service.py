@@ -1,8 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
-import psycopg2
 from loguru import logger
-from core.database import get_db_connection
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
@@ -37,31 +35,32 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
-def fetch_stock_data(ticker: str, period: str = "3mo") -> pd.DataFrame:
+async def fetch_stock_data(pool, ticker: str, period: str = "3mo") -> pd.DataFrame:
     try:
         period_days = {"1W": 7, "1M": 30, "3M": 90, "6M": 180, "1Y": 365, "1y": 365, "3mo": 90}
         days = period_days.get(period, 90)
         start_date = datetime.now() - timedelta(days=days)
         
-        conn = get_db_connection()
-        if not conn: return pd.DataFrame()
-        
+        if not pool:
+            return pd.DataFrame()
+            
         query = """
             SELECT event_date as date, open, high, low, close, volume
             FROM stock_prices_stream
-            WHERE ticker = %s AND event_date >= %s
+            WHERE ticker = $1 AND event_date >= $2
             ORDER BY event_time ASC
         """
-        df = pd.read_sql_query(query, conn, params=(ticker, start_date.date()))
-        conn.close()
-        
-        if not df.empty:
+        async with pool.acquire() as conn:
+            records = await conn.fetch(query, ticker, start_date.date())
+            
+        if records:
+            df = pd.DataFrame([dict(r) for r in records])
             df = df.drop_duplicates(subset=['date'], keep='last').reset_index(drop=True)
             df = calculate_indicators(df)
             # Ensure proper JSON serialization
             df.fillna(0, inplace=True)
             return df
     except Exception as e:
-        logger.error(f"PostgreSQL fetch failed: {e}")
+        logger.error(f"PostgreSQL async fetch failed: {e}")
     
     return pd.DataFrame()

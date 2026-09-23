@@ -60,31 +60,68 @@ def read_from_kafka(spark: SparkSession) -> DataFrame:
 
 
 def write_to_postgres(batch_df: DataFrame, batch_id: int) -> None:
-    """
-    Write a batch of data to PostgreSQL.
-    
-    Args:
-        batch_df: Spark DataFrame batch
-        batch_id: Batch identifier
-    """
     if batch_df.count() == 0:
         return
     
+    # 1. Convert micro-batch to Pandas
+    batch_pdf = batch_df.toPandas()
+    
+    # 2. Get last 15 records from Postgres to calculate rolling features
+    import pandas as pd
     try:
-        (
-            batch_df.write
-            .format("jdbc")
-            .option("url", POSTGRES_URL)
-            .option("dbtable", POSTGRES_TABLE)
-            .option("user", POSTGRES_USER)
-            .option("password", POSTGRES_PASSWORD)
-            .option("driver", "org.postgresql.Driver")
-            .mode("append")
-            .save()
-        )
-        print(f"✅ Batch {batch_id}: Wrote {batch_df.count()} records to PostgreSQL")
+        from sqlalchemy import create_engine
+        engine = create_engine(POSTGRES_URL.replace("jdbc:postgresql", "postgresql+psycopg2"))
+        
+        tickers = tuple(batch_pdf["ticker"].unique())
+        if len(tickers) == 1:
+            tickers_str = f"('{tickers[0]}')"
+        else:
+            tickers_str = str(tickers)
+            
+        history_query = f"""
+            SELECT * FROM (
+                SELECT ticker, event_time as date, open, high, low, close, volume,
+                ROW_NUMBER() OVER(PARTITION BY ticker ORDER BY event_time DESC) as rn
+                FROM {POSTGRES_TABLE}
+                WHERE ticker IN {tickers_str}
+            ) tmp WHERE rn <= 15
+        """
+        history_pdf = pd.read_sql(history_query, engine)
+        history_pdf = history_pdf.drop(columns=["rn"])
+        
+        # Format batch to match history
+        batch_pdf = batch_pdf.rename(columns={"event_time": "date"})
+        
+        # Combine
+        combined_pdf = pd.concat([history_pdf, batch_pdf]).drop_duplicates(subset=["ticker", "date"]).sort_values(["ticker", "date"])
+        
+        # 3. Apply Feature Engineering
+        from machine_learning.feature_engineering.features import build_features
+        features_pdf = pd.DataFrame()
+        for ticker, group in combined_pdf.groupby("ticker"):
+            feat_group = build_features(group)
+            features_pdf = pd.concat([features_pdf, feat_group])
+            
+        # Filter only new records (from batch)
+        batch_dates = batch_pdf["date"].tolist()
+        features_pdf = features_pdf[features_pdf["date"].isin(batch_dates)]
+        
+        if features_pdf.empty:
+            print(f"⚠️ Batch {batch_id}: No valid features generated (not enough history?)")
+            # Write raw data anyway
+            features_pdf = batch_pdf
+            
+        # 4. Write back to Postgres
+        # We rename date back to event_time if needed, but since we are replacing the logic, let's keep it simple
+        features_pdf = features_pdf.rename(columns={"date": "event_time"})
+        
+        # Convert back to Spark DF to write efficiently, or just use pandas to_sql
+        features_pdf.to_sql(POSTGRES_TABLE, engine, if_exists='append', index=False)
+        print(f"✅ Batch {batch_id}: Wrote {len(features_pdf)} records with features to PostgreSQL")
+        
     except Exception as e:
-        print(f"❌ Batch {batch_id}: Failed to write to PostgreSQL - {e}")
+        print(f"❌ Batch {batch_id}: Failed to process/write to PostgreSQL - {e}")
+
 
 
 def write_to_console(batch_df: DataFrame, batch_id: int) -> None:

@@ -198,9 +198,30 @@ def run_train(
         if save_model:
             from src.machine_learning.model_registry import ModelRegistry
             
+            try:
+                import mlflow
+                import mlflow.sklearn
+                # Ensure MLflow backend store URI uses Docker network host or env variable
+                mlflow_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
+                mlflow.set_tracking_uri(mlflow_uri)
+                mlflow.set_experiment("RealTime_Stock_Prediction_DAG")
+                
+                with mlflow.start_run():
+                    mlflow.log_param("model_type", model_type)
+                    mlflow.log_param("ticker", ticker)
+                    mlflow.log_param("lookback_days", lookback_days)
+                    mlflow.log_metrics(metrics)
+                    
+                    if model_type == "random_forest":
+                        mlflow.sklearn.log_model(model, "model")
+                    
+                    logger.info("✅ Logged run to MLflow")
+            except ImportError:
+                logger.warning("MLflow not installed in Airflow worker, skipping MLflow tracking")
+            except Exception as e:
+                logger.warning(f"MLflow tracking failed: {e}")
+            
             # For Random Forest, we save the scikit-learn model
-            # For PyTorch LSTM, ModelRegistry uses pickle by default, which works but torch.save is preferred.
-            # To keep things simple we use pickle for now, or adapt later.
             version = ModelRegistry.save_model(
                 model=model,
                 scaler=scaler,
