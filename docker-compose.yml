@@ -12,13 +12,14 @@ x-airflow-common: &airflow-common
     _AIRFLOW_WWW_USER_CREATE: 'true'
     _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER:-airflow}
     _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-airflow}
-    _PIP_ADDITIONAL_REQUIREMENTS: "yfinance>=0.2.0 pandas>=2.0.0 loguru>=0.7.0"
+    _PIP_ADDITIONAL_REQUIREMENTS: "yfinance>=0.2.0 pandas>=2.0.0 loguru>=0.7.0 requests==2.32.3"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ./src:/opt/airflow/src
     - ./scripts:/opt/airflow/scripts
+    - ./integrations:/opt/airflow/integrations:ro
     - ./src/machine_learning/artifacts:/opt/airflow/src/machine_learning/artifacts
   depends_on:
     postgres:
@@ -100,6 +101,19 @@ services:
         condition: service_completed_successfully
     command: scheduler
     restart: always
+    environment:
+      <<: *airflow-env
+      CLOUDVAULT_BASE_URL: ${CLOUDVAULT_BASE_URL:-http://cloudvault-api}
+      CLOUDVAULT_PROJECT_ID: real-time-stock
+      CLOUDVAULT_SERVICE_TOKEN: ${CLOUDVAULT_SERVICE_TOKEN:-}
+      CLOUDVAULT_CONNECT_TIMEOUT_SECONDS: ${CLOUDVAULT_CONNECT_TIMEOUT_SECONDS:-5}
+      CLOUDVAULT_READ_TIMEOUT_SECONDS: ${CLOUDVAULT_READ_TIMEOUT_SECONDS:-60}
+      CLOUDVAULT_MAX_RETRIES: ${CLOUDVAULT_MAX_RETRIES:-3}
+      CLOUDVAULT_RETRY_BASE_SECONDS: ${CLOUDVAULT_RETRY_BASE_SECONDS:-0.5}
+      CLOUDVAULT_MAX_FILE_BYTES: ${CLOUDVAULT_MAX_FILE_BYTES:-104857600}
+    networks:
+      - default
+      - cloudvault-shared
 
   # ---------------------------
   # KAFKA + ZOOKEEPER
@@ -264,3 +278,8 @@ volumes:
   redis_data:
   kafka_data:
   mlflow_data:
+
+networks:
+  cloudvault-shared:
+    external: true
+    name: cloudvault-shared
