@@ -144,3 +144,26 @@ async def get_predictions(request: Request, ticker: str, model: str = Query("Ran
     except Exception as e:
         logger.error(f"Failed to fetch predictions: {e}")
         return {}
+
+@router.get("/feature-importance/{ticker}")
+async def get_feature_importance(request: Request, ticker: str):
+    import os
+    import json
+    
+    # Check for specific ticker first, then fallback to ALL
+    model_dir = os.path.join(os.path.dirname(__file__), "..", "..", "machine_learning", "models")
+    
+    ticker_file = os.path.join(model_dir, f"feature_importance_{ticker}.json")
+    all_file = os.path.join(model_dir, "feature_importance_ALL.json")
+    
+    target_file = ticker_file if os.path.exists(ticker_file) else all_file
+    
+    if os.path.exists(target_file):
+        try:
+            with open(target_file, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Error reading feature importance: {e}")
+            return []
+    
+    return []

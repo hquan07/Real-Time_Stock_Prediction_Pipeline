@@ -143,6 +143,26 @@ def run_train(
             # Example: 95% CI is approx pred +/- 1.96 * ci_std
             avg_ci_width = np.mean(ci_std) * 1.96
             stats["confidence_interval_width"] = float(avg_ci_width)
+            
+            # Save Feature Importance
+            try:
+                import json
+                import os
+                importances = model.feature_importances_
+                # Pair with feature names and sort
+                feat_imp = sorted(zip(feature_names, importances), key=lambda x: x[1], reverse=True)
+                
+                # We'll save the top 15 features to a JSON file
+                feat_imp_list = [{"feature": k, "importance": float(v)} for k, v in feat_imp[:15]]
+                
+                model_dir = os.path.join(os.path.dirname(__file__), "..", "..", "src", "machine_learning", "models")
+                os.makedirs(model_dir, exist_ok=True)
+                feat_file = os.path.join(model_dir, f"feature_importance_{ticker if ticker else 'ALL'}.json")
+                with open(feat_file, "w") as f:
+                    json.dump(feat_imp_list, f)
+                logger.info(f"✅ Saved feature importance to {feat_file}")
+            except Exception as e:
+                logger.error(f"Failed to save feature importance: {e}")
 
         elif model_type == "lstm":
             from src.deep_learning.model.lstm import train_lstm

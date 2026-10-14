@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import useStore from '../store/useStore';
 import StatCard from './StatCard';
 import PriceChart from './PriceChart';
+import VolumeProfile from './VolumeProfile';
 
 const DashboardTab = () => {
   const { 
@@ -12,7 +13,8 @@ const DashboardTab = () => {
     isLoadingHistorical, 
     fetchTickers, 
     fetchHistoricalData,
-    historicalPeriod
+    historicalPeriod,
+    fetchMLData
   } = useStore();
 
   const [realtimeData, setRealtimeData] = useState([]);
@@ -26,9 +28,10 @@ const DashboardTab = () => {
   useEffect(() => {
     if (selectedTicker) {
       fetchHistoricalData(selectedTicker, historicalPeriod);
+      fetchMLData(selectedTicker);
       setRealtimeData([]); // Reset realtime append data
     }
-  }, [selectedTicker, historicalPeriod, fetchHistoricalData]);
+  }, [selectedTicker, historicalPeriod, fetchHistoricalData, fetchMLData]);
 
   // WebSocket for Realtime ticks
   useEffect(() => {
@@ -116,16 +119,20 @@ const DashboardTab = () => {
         <StatCard title="RSI (14d)" value={currentRSI ? currentRSI.toFixed(2) : "0.00"} change={currentRSI - 50} />
       </div>
 
-      {/* Main Chart Area */}
-      <div style={{ height: '600px' }}>
-        {isLoadingHistorical && combinedData.length === 0 ? (
-          <div className="glass-card" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ color: '#6366f1', fontSize: '20px', fontWeight: 500, animation: 'pulse 1.5s infinite' }}>Loading Data...</div>
+      {isLoadingHistorical && combinedData.length === 0 ? (
+        <div className="glass-card" style={{ height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ color: '#6366f1', fontSize: '20px', fontWeight: 500, animation: 'pulse 1.5s infinite' }}>Loading Data...</div>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+          <div style={{ height: '600px' }}>
+            <PriceChart data={combinedData} ticker={selectedTicker} />
           </div>
-        ) : (
-          <PriceChart data={combinedData} ticker={selectedTicker} />
-        )}
-      </div>
+          <div style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+            <VolumeProfile data={combinedData} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,6 +14,11 @@ const useStore = create((set, get) => ({
     isLoadingHistorical: false,
     historicalPeriod: '3M',
     
+    // ML Data State
+    predictionsData: { historical: [], future: [] },
+    featureImportance: [],
+    isLoadingML: false,
+    
     // Actions
     setSelectedTicker: (ticker) => set({ selectedTicker: ticker }),
     setHistoricalPeriod: (period) => set({ historicalPeriod: period }),
@@ -41,6 +46,28 @@ const useStore = create((set, get) => ({
         } catch (error) {
             console.error('Failed to fetch historical data', error);
             set({ historicalData: [], isLoadingHistorical: false });
+        }
+    },
+    
+    fetchMLData: async (ticker) => {
+        set({ isLoadingML: true });
+        try {
+            const [predRes, featRes] = await Promise.all([
+                axios.get(`${API_BASE_URL}/predictions/${ticker}?model=RandomForest`),
+                axios.get(`${API_BASE_URL}/feature-importance/${ticker}`)
+            ]);
+            set({ 
+                predictionsData: predRes.data || { historical: [], future: [] },
+                featureImportance: featRes.data || [],
+                isLoadingML: false 
+            });
+        } catch (error) {
+            console.error('Failed to fetch ML data', error);
+            set({ 
+                predictionsData: { historical: [], future: [] },
+                featureImportance: [],
+                isLoadingML: false 
+            });
         }
     }
 }));
