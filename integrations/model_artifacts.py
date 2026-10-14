@@ -18,7 +18,11 @@ from integrations.cloudvault import CloudVaultClient, CloudVaultError, DEFAULT_P
 
 
 REQUIRED_BUNDLE_FILES = ("model.pkl", "scaler.pkl", "metadata.json")
-GENERATED_BUNDLE_FILES = {"manifest.json", "cloudvault_publish.json"}
+GENERATED_BUNDLE_FILES = {
+    "manifest.json",
+    "cloudvault_publish.json",
+    "cloudvault_restore.json",
+}
 CONTENT_TYPES = {
     "model.pkl": "application/octet-stream",
     "scaler.pkl": "application/octet-stream",
