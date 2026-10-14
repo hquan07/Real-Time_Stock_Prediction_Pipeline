@@ -39,4 +39,14 @@ with DAG(
         env=env_vars,
     )
 
-    generate_signals
+    publish_signals = BashOperator(
+        task_id='publish_signal_report_to_cloudvault',
+        bash_command=(
+            'python /opt/airflow/scripts/publish_signals.py '
+            '--logical-date "{{ ds }}" '
+            '--source-run-id "{{ run_id }}"'
+        ),
+        env=env_vars,
+    )
+
+    generate_signals >> publish_signals

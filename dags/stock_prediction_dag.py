@@ -25,6 +25,7 @@ with DAG(
     description='Real-time stock data pipeline for prediction',
     schedule_interval='0 9 * * 1-5',  # 9 AM weekdays
     catchup=False,
+    max_active_runs=1,
     tags=['stock', 'prediction', 'pipeline'],
 ) as dag:
 
@@ -40,7 +41,17 @@ with DAG(
         bash_command='python /opt/airflow/scripts/run_train.py --model random_forest --days 90',
     )
 
+    publish_model_task = BashOperator(
+        task_id='publish_validated_model_to_cloudvault',
+        bash_command=(
+            'python /opt/airflow/scripts/publish_model.py '
+            '--logical-date "{{ ds }}" '
+            '--source-run-id "{{ run_id }}" '
+            '--training-window-days 90'
+        ),
+    )
+
     end = DummyOperator(task_id='end')
 
     # Task dependencies
-    start >> ingest_task >> train_task >> end
+    start >> ingest_task >> train_task >> publish_model_task >> end

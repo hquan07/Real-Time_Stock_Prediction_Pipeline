@@ -146,6 +146,52 @@ python airflow/scripts/run_inference.py
 - **Model Registry:** Trained models are automatically saved in `src/machine_learning/artifacts/registry`. The signal generator will always fetch the `latest` model version from here.
 - **Signal Generator:** Calculates RSI and fetches predictions from the model to insert BUY/SELL/HOLD signals into the database. Airflow schedules this via `dags/signal_generation_dag.py`.
 
+### 7. CloudVault Artifact Publishing
+
+CloudVault is an optional durable catalog for validated model bundles and compact daily signal reports. PostgreSQL, MLflow and the local model registry remain the operational sources; inference does not download models from CloudVault automatically.
+
+Create the shared Docker network and provision the `real-time-stock` project/service account in CloudVault first. The publisher needs `files:create`; manual restore also needs `files:read`.
+
+```bash
+docker network create cloudvault-shared
+```
+
+Configure `.env` and enable each artifact type explicitly:
+
+```dotenv
+CLOUDVAULT_BASE_URL=http://cloudvault-api
+CLOUDVAULT_PROJECT_ID=real-time-stock
+CLOUDVAULT_SERVICE_TOKEN=<service-account-token>
+CLOUDVAULT_PUBLISH_ENABLED=true
+CLOUDVAULT_REPORT_PUBLISH_ENABLED=true
+
+# Optional model quality gates; keep empty until approved.
+CLOUDVAULT_MAX_TEST_RMSE=
+CLOUDVAULT_MAX_TEST_MAE=
+```
+
+The stock training DAG validates and publishes `model.pkl`, `scaler.pkl`, `metadata.json`, then uploads a catalog manifest containing their checksums and `file_id` values. The signal DAG publishes one deterministic JSON export per logical run. Upload failures leave local artifacts intact and write a local `cloudvault_publish.json` or `.cloudvault.json` status file for diagnosis/retry.
+
+Restore is a manual, checksum-verified operation. It does not activate the downloaded version unless `--activate` is supplied:
+
+```bash
+docker compose exec airflow-scheduler \
+  python /opt/airflow/scripts/restore_model.py \
+  --manifest-file-id <manifest-file-id>
+
+docker compose exec airflow-scheduler \
+  python /opt/airflow/scripts/restore_model.py \
+  --manifest-file-id <manifest-file-id> \
+  --activate
+
+# Roll back by atomically selecting a retained, verified local version.
+docker compose exec airflow-scheduler \
+  python /opt/airflow/scripts/restore_model.py \
+  --rollback-to <previous-version>
+```
+
+Restore validates the manifest, project boundary, exact bundle contents, size and SHA-256 before installing a version. It never unpickles downloaded content during verification, and activation retains the previous version directory for rollback.
+
 ## 📊 Dashboard
 
 Access the dashboard at: `http://localhost:8050`

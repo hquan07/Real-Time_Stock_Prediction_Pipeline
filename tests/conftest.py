@@ -15,8 +15,10 @@ import numpy as np
 # Unset SPARK_HOME so pyspark uses its bundled spark
 os.environ.pop("SPARK_HOME", None)
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+# Add both the repository root (for integrations/scripts) and src package path.
+REPOSITORY_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, REPOSITORY_ROOT)
+sys.path.insert(0, os.path.join(REPOSITORY_ROOT, "src"))
 
 
 # ---------------------------------------------------------------------------
