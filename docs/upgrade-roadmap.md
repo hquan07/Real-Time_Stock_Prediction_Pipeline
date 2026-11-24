@@ -40,6 +40,22 @@ Thời lượng là ước tính cho một nhóm 1–2 kỹ sư làm bán thời
 
 Chi tiết thực thi và các điều kiện còn chặn P0 được ghi tại [preflight README](preflight/README.md).
 
+### Quy ước branch theo pha
+
+Mỗi pha được triển khai trên một branch riêng, tạo từ `main` hoặc branch của pha trước sau khi gate được phê duyệt. Tên branch dùng mẫu `upr/p<phase>-<muc-tieu-ngan>`; chỉ merge khi toàn bộ tiêu chí nghiệm thu của pha đó đạt. Không dùng branch pha mới để sửa trực tiếp công việc của pha trước.
+
+| Pha | Branch chính | Điểm bắt đầu | Điều kiện merge |
+| --- | --- | --- | --- |
+| P-0 Preflight | `upg/p0-preflight` *(đã tồn tại, theo tên cũ)* | `main` baseline | Go/no-go preflight được owner xác nhận |
+| P0 Baseline & security | `upr/p0-foundation` | Tag/commit preflight đã xác nhận | Secrets, repository hygiene, CI và smoke test đạt gate |
+| P1 Data contract & storage | `upr/p1-data-contract` | `main` sau P0 | Contract, migrations, quality gate và replay test đạt |
+| P2 Streaming & orchestration | `upr/p2-streaming` | `main` sau P1 | Checkpoint/recovery/idempotency và DAG schedule đạt |
+| P3 ML correctness & evaluation | `upr/p3-ml-validation` | `main` sau P1; chỉ ghép P2 khi cần runtime | Walk-forward, baseline, lineage và promotion gate đạt |
+| P4 Signal, risk & backtest | `upr/p4-signal-backtest` | `main` sau P3 | Backtest/review/paper-risk gate đạt |
+| P5 Product & observability | `upr/p5-pilot-operations` | `main` sau P2–P4 | UAT, monitoring, backup/restore và pilot go/no-go đạt |
+
+Mỗi branch pha phải có: issue/decision record liên kết, checklist phạm vi, test evidence và rollback commit. Khi cần sửa khẩn cấp sau merge, dùng `upr/fix-<muc-tieu>` từ `main`, không mở lại branch pha đã merge.
+
 ---
 
 ## 3. Pha 0 — Baseline, bảo mật và khả năng tái lập
