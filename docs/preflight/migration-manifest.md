@@ -19,3 +19,16 @@ Manifest này là inventory trước refactor. Mỗi dòng chỉ được migrat
 ## Rollback rule
 
 Không dùng `git reset --hard` để rollback P0. Mỗi PR refactor phải có commit đảo ngược được, giữ compatibility shim cho một release nếu còn caller cũ, và giữ tag preflight làm mốc điều tra.
+
+## Execution record
+
+| Hạng mục | Trạng thái | Bằng chứng |
+| --- | --- | --- |
+| `src/dashboard/frontend` → `apps/web` | Hoàn thành | Frontend lint/build và container smoke pass tại commit `874f7d51` |
+| `src/dashboard/backend` → `services/api` | Hoàn thành | `/health` và same-origin `/api/health` pass tại commit `874f7d51` |
+| Legacy Dash | Đã đóng băng | Không còn trong navigation/runtime chính; chưa xóa |
+| Runtime files khỏi Git index | Hoàn thành | Không còn `.env`, venv, cache, log, checkpoint được track |
+| Settings hợp nhất | Đang thực hiện | DB/Kafka/Redis/CORS/schema path đã dùng `src/config/settings.py`; package move còn chờ |
+| Pipeline package + CLI/DAG adapters | Chưa bắt đầu | Cần baseline import/unit contract trước khi move |
+| SQL migrations | Chưa bắt đầu | Dump hiện tại còn role-bound; cần migration/rollback test |
+| Dependency lock/constraints | Chưa hoàn thành | Frontend lock đã sạch; Python/Airflow còn nhiều requirements |

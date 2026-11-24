@@ -12,6 +12,14 @@ import pytest
 import pandas as pd
 import numpy as np
 
+# Safe test-only defaults; real environment values still take precedence.
+os.environ.setdefault("POSTGRES_HOST", "localhost")
+os.environ.setdefault("POSTGRES_PORT", "5432")
+os.environ.setdefault("POSTGRES_DB", "stockdb_test")
+os.environ.setdefault("POSTGRES_USER", "postgres")
+os.environ.setdefault("POSTGRES_PASSWORD", "test-only-placeholder")
+os.environ.setdefault("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+
 # Unset SPARK_HOME so pyspark uses its bundled spark
 os.environ.pop("SPARK_HOME", None)
 

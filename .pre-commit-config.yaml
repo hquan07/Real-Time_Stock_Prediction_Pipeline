@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: committed-secret-check
+        name: committed secret check
+        entry: scripts/ci/check_secrets.sh
+        language: system
+        pass_filenames: false
+      - id: python-compile
+        name: Python syntax check
+        entry: python3 -m compileall -q src services scripts tests
+        language: system
+        pass_filenames: false
+      - id: frontend-lint
+        name: frontend lint
+        entry: npm --prefix apps/web run lint
+        language: system
+        pass_filenames: false

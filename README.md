@@ -210,14 +210,20 @@ Features:
 ## 🧪 Running Tests
 
 ```bash
+# Validate Compose, committed secrets, Python syntax and frontend lint
+make lint
+
 # Run all tests
-pytest tests/ -v
+python -m pytest -c tests/pytest.ini tests/ -v
 
 # Run unit tests only
-pytest tests/unit/ -v
+make test-unit
 
 # Run with coverage
-pytest tests/ --cov=src --cov-report=html
+python -m pytest -c tests/pytest.ini tests/ --cov=src --cov-report=html
+
+# With the dashboard stack running
+make smoke-test
 ```
 
 ## 🔧 Services & Ports
