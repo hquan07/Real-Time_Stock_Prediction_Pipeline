@@ -28,6 +28,7 @@ Mục tiêu là chuyển dự án từ một MVP phục vụ học tập/demo th
 
 | Pha | Thời lượng ước tính | Phụ thuộc | Kết quả/gate kết thúc |
 | --- | ---: | --- | --- |
+| P-0. Preflight | Trước tuần 1 | — | Secrets được khoanh vùng, backup/baseline/ADR/migration manifest đã được xác nhận |
 | 0. Baseline & security | Tuần 1 | — | Secrets đã xoay vòng; CI, compose và inventory có thể tái lập |
 | 1. Data contract & storage | Tuần 2–3 | Pha 0 | Một event có schema/version/key; dữ liệu raw và clean truy vết được |
 | 2. Streaming & orchestration | Tuần 4–5 | Pha 1 | Consumer chạy liên tục, checkpoint bền vững, replay không tạo bản ghi trùng |
@@ -36,6 +37,8 @@ Mục tiêu là chuyển dự án từ một MVP phục vụ học tập/demo th
 | 5. Product & observability | Tuần 11–12 | Pha 2–4 | Dashboard dùng dữ liệu thật, alerting, runbook và UAT pilot |
 
 Thời lượng là ước tính cho một nhóm 1–2 kỹ sư làm bán thời gian. Không bắt đầu pha kế tiếp khi gate của pha trước chưa đạt.
+
+Chi tiết thực thi và các điều kiện còn chặn P0 được ghi tại [preflight README](preflight/README.md).
 
 ---
 

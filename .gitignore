@@ -2,6 +2,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
+src/dashboard/backend/venv/
+logs/
+backups/
+notebooks/.ipynb_checkpoints/
 .env
 node_modules/
 .DS_Store
