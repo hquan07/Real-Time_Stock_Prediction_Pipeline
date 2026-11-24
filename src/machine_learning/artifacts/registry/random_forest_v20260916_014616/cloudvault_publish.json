@@ -1,0 +1,30 @@
+{
+  "files": [
+    {
+      "content_type": "application/octet-stream",
+      "file_id": "89d5aebc-0838-460b-bbf0-17477a0e2b8a",
+      "name": "model.pkl",
+      "sha256": "c15aa1bec1b7570cc868508a749f189dea523f75adec11905ee908da276d877b",
+      "size_bytes": 9542705
+    },
+    {
+      "content_type": "application/octet-stream",
+      "file_id": "11a2e197-4d4d-4d1d-9b9e-46f5e5df11ff",
+      "name": "scaler.pkl",
+      "sha256": "b0ea5d7e1ef4bad94c9953e1d6b73da6d0a3c57e3d572b379b949837d20d55cc",
+      "size_bytes": 1150
+    },
+    {
+      "content_type": "application/json",
+      "file_id": "7f7b0472-1d10-48ef-abda-f0ed46be957b",
+      "name": "metadata.json",
+      "sha256": "1a59176e23d79cf5e1b962fbd75b3ba5c157f216cd62cac36b33d71bc324f7c5",
+      "size_bytes": 536
+    }
+  ],
+  "manifest_file_id": "84fa320f-39b0-4747-861f-d5e5ec8d7f9b",
+  "project_id": "real-time-stock",
+  "published_at": "2026-10-14T07:49:53.296300+00:00",
+  "status": "published",
+  "version": "random_forest_v20260916_014616"
+}

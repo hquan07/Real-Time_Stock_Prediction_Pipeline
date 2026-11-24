@@ -1,0 +1,74 @@
+{
+  "artifact_type": "validated_model_bundle",
+  "created_at": "2026-09-16T01:46:16.842520",
+  "dependencies": {
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "scikit-learn": "not-installed"
+  },
+  "features": [
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "log_return",
+    "ma_5",
+    "ma_10",
+    "volatility_10",
+    "close_lag_1",
+    "close_lag_5",
+    "close_lag_10"
+  ],
+  "files": [
+    {
+      "content_type": "application/octet-stream",
+      "file_id": "89d5aebc-0838-460b-bbf0-17477a0e2b8a",
+      "name": "model.pkl",
+      "sha256": "c15aa1bec1b7570cc868508a749f189dea523f75adec11905ee908da276d877b",
+      "size_bytes": 9542705
+    },
+    {
+      "content_type": "application/octet-stream",
+      "file_id": "11a2e197-4d4d-4d1d-9b9e-46f5e5df11ff",
+      "name": "scaler.pkl",
+      "sha256": "b0ea5d7e1ef4bad94c9953e1d6b73da6d0a3c57e3d572b379b949837d20d55cc",
+      "size_bytes": 1150
+    },
+    {
+      "content_type": "application/json",
+      "file_id": "7f7b0472-1d10-48ef-abda-f0ed46be957b",
+      "name": "metadata.json",
+      "sha256": "1a59176e23d79cf5e1b962fbd75b3ba5c157f216cd62cac36b33d71bc324f7c5",
+      "size_bytes": 536
+    }
+  ],
+  "metrics": {
+    "test_mae": 0.4975480787726887,
+    "test_rmse": 0.6261979806617564,
+    "train_rmse": 0.3906419191033346
+  },
+  "model_type": "random_forest",
+  "project_id": "real-time-stock",
+  "python_version": "3.12.3",
+  "schema_version": 1,
+  "serialization": "pickle",
+  "target": "target_return",
+  "ticker_scope": [
+    "ALL"
+  ],
+  "training_window_days": 90,
+  "validation": {
+    "checks": [
+      "required_files",
+      "allowed_files",
+      "metadata_schema",
+      "finite_metrics",
+      "quality_thresholds",
+      "bundle_size",
+      "sha256"
+    ],
+    "status": "passed"
+  },
+  "version": "random_forest_v20260916_014616"
+}
