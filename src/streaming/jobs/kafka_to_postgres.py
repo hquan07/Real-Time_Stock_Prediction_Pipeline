@@ -8,32 +8,27 @@ import sys
 import json
 from io import BytesIO
 from datetime import datetime
+from pathlib import Path
 
 # Ensure src is in path
-sys.path.insert(0, '/home/hquan07/Real-Time_Stock_Prediction_Pipeline')
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kafka import KafkaConsumer
 import psycopg2
 from fastavro import schemaless_reader
 from loguru import logger
+from config.settings import DatabaseSettings, KafkaSettings
 
-# Kafka config
-KAFKA_BOOTSTRAP = "localhost:9092"
-KAFKA_TOPIC = "stock_raw_data"
-
-# PostgreSQL config  
-DB_HOST = "localhost"
-DB_PORT = 5433
-DB_NAME = "stockdb"
-DB_USER = "postgres"
-DB_PASSWORD = "Huyquan1607"
-
-import os
 from fastavro import parse_schema
 
+DB_SETTINGS = DatabaseSettings.from_env()
+KAFKA_SETTINGS = KafkaSettings.from_env()
+KAFKA_BOOTSTRAP = KAFKA_SETTINGS.bootstrap_servers
+KAFKA_TOPIC = KAFKA_SETTINGS.topic
+
 # Avro schema for deserialization
-SCHEMA_PATH = "/home/hquan07/Desktop/Real-Time_Stock_Prediction_Pipeline/src/data_ingestion/schema/stock_schema.avsc"
-with open(SCHEMA_PATH, "r") as f:
+with KAFKA_SETTINGS.schema_path.open("r") as f:
     STOCK_SCHEMA = parse_schema(json.load(f))
 
 
@@ -42,11 +37,7 @@ with open(SCHEMA_PATH, "r") as f:
 def get_db_connection():
     """Create PostgreSQL connection"""
     return psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
+        **DB_SETTINGS.connect_kwargs()
     )
 
 
@@ -117,7 +108,10 @@ def run_consumer():
     
     # Connect to PostgreSQL
     conn = get_db_connection()
-    logger.info(f"✅ Connected to PostgreSQL {DB_HOST}:{DB_PORT}/{DB_NAME}")
+    logger.info(
+        f"✅ Connected to PostgreSQL {DB_SETTINGS.host}:"
+        f"{DB_SETTINGS.port}/{DB_SETTINGS.database}"
+    )
     
     # Create Kafka consumer
     consumer = KafkaConsumer(

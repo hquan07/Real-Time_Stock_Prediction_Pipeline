@@ -11,18 +11,19 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 from loguru import logger
+from config.settings import DatabaseSettings
 
 
 # ---------------------------------------------------------------------------
 # Configuration from environment
 # ---------------------------------------------------------------------------
-DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
-DB_PORT = int(os.getenv("POSTGRES_PORT", "5433"))
-DB_NAME = os.getenv("POSTGRES_DB", "stockdb")
-DB_USER = os.getenv("POSTGRES_USER", "postgres")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
-
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+_settings = DatabaseSettings.from_env()
+DB_HOST = _settings.host
+DB_PORT = _settings.port
+DB_NAME = _settings.database
+DB_USER = _settings.user
+DB_PASSWORD = _settings.password
+DATABASE_URL = _settings.sqlalchemy_url
 
 
 # ---------------------------------------------------------------------------

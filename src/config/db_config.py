@@ -1,11 +1,12 @@
-import os
+"""Compatibility exports; new code should use :mod:`config.settings`."""
 
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = int(os.getenv("DB_PORT", "5433"))
-DB_NAME = os.getenv("DB_NAME", "stockdb")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+from .settings import DatabaseSettings
 
-SQLALCHEMY_URL = (
-    f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+
+_settings = DatabaseSettings.from_env()
+DB_HOST = _settings.host
+DB_PORT = _settings.port
+DB_NAME = _settings.database
+DB_USER = _settings.user
+DB_PASSWORD = _settings.password
+SQLALCHEMY_URL = _settings.sqlalchemy_url

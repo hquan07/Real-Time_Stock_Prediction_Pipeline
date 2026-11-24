@@ -21,6 +21,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error
+from config.settings import DatabaseSettings, PROJECT_ROOT
 
 try:
     import torch
@@ -32,16 +33,10 @@ except ImportError:
     logger.warning("PyTorch not available. LSTM training will be skipped.")
 
 # DB Config
-DB_CONFIG = {
-    "host": "localhost",
-    "port": 5433,
-    "database": "stockdb",
-    "user": "postgres",
-    "password": "Huyquan1607"
-}
+DB_CONFIG = DatabaseSettings.from_env().connect_kwargs()
 
-ARTIFACTS_DIR = "src/machine_learning/artifacts"
-DL_ARTIFACTS_DIR = "src/deep_learning/artifacts"
+ARTIFACTS_DIR = str(PROJECT_ROOT / "src/machine_learning/artifacts")
+DL_ARTIFACTS_DIR = str(PROJECT_ROOT / "src/deep_learning/artifacts")
 
 
 def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:

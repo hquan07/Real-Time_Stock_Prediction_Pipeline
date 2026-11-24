@@ -1,0 +1,69 @@
+import os
+import sys
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
+
+# Add project root to path for imports if needed
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from contextlib import asynccontextmanager
+import asyncio
+from api.routes import router
+from api.ws import router as ws_router, consume_kafka
+from core.database import get_db_pool
+from services.redis_cache import redis_client
+from config.settings import cors_origins
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Setup Async Database Pool
+    app.state.pool = await get_db_pool()
+    if app.state.pool:
+        logger.info("✅ Async Database Pool created")
+    else:
+        logger.warning("⚠️ Failed to create Database Pool")
+
+    # Start Kafka consumer background task
+    task = asyncio.create_task(consume_kafka())
+    yield
+    # Cancel task on shutdown
+    task.cancel()
+    
+    # Close resources
+    if app.state.pool:
+        await app.state.pool.close()
+        logger.info("🛑 Database Pool closed")
+    await redis_client.close()
+    logger.info("🛑 Redis connection closed")
+
+app = FastAPI(
+    title="Real-Time Stock Prediction API",
+    description="Backend for the React/Vite Dashboard",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Configure CORS for Frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins(),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(router, prefix="/api")
+app.include_router(ws_router, prefix="/api/ws")
+
+@app.get("/api/health")
+@app.get("/health", include_in_schema=False)
+def health_check():
+    return {"status": "ok", "message": "FastAPI is running"}
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    host = os.getenv("HOST", "0.0.0.0")
+    logger.info(f"🚀 Starting FastAPI backend on http://{host}:{port}")
+    uvicorn.run("main:app", host=host, port=port, reload=True)

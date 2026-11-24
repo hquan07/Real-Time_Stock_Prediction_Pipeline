@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/dist
+backups
+data
+logs
+notebooks/.ipynb_checkpoints

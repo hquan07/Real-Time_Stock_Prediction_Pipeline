@@ -127,19 +127,22 @@ python -c "from src.database.db_connection import init_database; init_database()
 
 ```bash
 # Run data ingestion
-python src/data_ingestion/main.py
+python -m src.data_ingestion.main
 
-# Run dashboard
-python src/dashboard/app.py
+# Run the canonical dashboard in development
+cd apps/web && npm install && npm run dev
+
+# In another terminal, run the API
+cd services/api && uvicorn main:app --host 0.0.0.0 --port 8000
 
 # Train models & register to Model Registry
-python airflow/scripts/run_train.py --model random_forest
+python scripts/run_train.py --model random_forest
 
 # Generate trading signals (uses latest model from Registry)
 python scripts/signal_generator.py
 
 # Run inference stream
-python airflow/scripts/run_inference.py
+python scripts/run_inference.py
 ```
 
 ### 6. MLOps & Signals Generation
@@ -194,7 +197,9 @@ Restore validates the manifest, project boundary, exact bundle contents, size an
 
 ## 📊 Dashboard
 
-Access the dashboard at: `http://localhost:8050`
+The canonical React dashboard is available at `http://localhost:5173` when started with Docker Compose (override with `DASHBOARD_PORT`). The FastAPI/OpenAPI endpoint is available at `http://localhost:8000/docs`.
+
+The legacy Dash application under `src/dashboard` is frozen during P0 and is not the supported dashboard entrypoint.
 
 Features:
 - Real-time stock price charts (Candlestick/Line)
@@ -219,14 +224,16 @@ pytest tests/ --cov=src --cov-report=html
 
 | Service | Port | URL |
 |---------|------|-----|
-| PostgreSQL | 5432 | localhost:5432 |
+| PostgreSQL | 5433 | localhost:5433 |
 | Kafka | 9092 | localhost:9092 |
 | Zookeeper | 2181 | localhost:2181 |
 | Spark Master | 7077, 8080 | http://localhost:8080 |
 | Spark Worker | 8082 | http://localhost:8082 |
 | Airflow | 8081 | http://localhost:8081 |
 | Jupyter | 8888 | http://localhost:8888 |
-| Dashboard | 8050 | http://localhost:8050 |
+| MLflow | 5000 | http://localhost:5000 |
+| Dashboard API | 8000 | http://localhost:8000/docs |
+| Dashboard | 5173 | http://localhost:5173 |
 
 ## 📦 Key Dependencies
 

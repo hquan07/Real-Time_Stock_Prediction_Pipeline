@@ -1,10 +1,7 @@
 #!/bin/bash
 
-echo "🚀 Starting Python Application..."
+set -eu
 
-# Example options:
-# python src/main.py
-# uvicorn src.dashboard.app:app --host 0.0.0.0 --port 8000
-# python src/streaming/jobs/spark_consumer_job.py
-
-python src/dashboard/app.py
+echo "Starting FastAPI dashboard service..."
+cd /app/services/api
+exec uvicorn main:app --host 0.0.0.0 --port "${PORT:-8000}"

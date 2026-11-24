@@ -4,17 +4,18 @@ Complete Database Populator
 Fetches comprehensive stock data from yfinance and populates all database tables
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
 import yfinance as yf
 import psycopg2
 from datetime import datetime, timedelta
 from loguru import logger
+from config.settings import DatabaseSettings
 
-# PostgreSQL config  
-DB_HOST = "localhost"
-DB_PORT = 5433
-DB_NAME = "stockdb"
-DB_USER = "postgres"
-DB_PASSWORD = "Huyquan1607"
+DB_SETTINGS = DatabaseSettings.from_env()
 
 # Stocks to fetch
 TICKERS = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'V', 'WMT']
@@ -23,8 +24,7 @@ TICKERS = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'V', 
 def get_db_connection():
     """Create PostgreSQL connection"""
     return psycopg2.connect(
-        host=DB_HOST, port=DB_PORT, database=DB_NAME,
-        user=DB_USER, password=DB_PASSWORD
+        **DB_SETTINGS.connect_kwargs()
     )
 
 
@@ -145,7 +145,10 @@ def main():
     logger.info("=" * 60)
     
     conn = get_db_connection()
-    logger.info(f"✅ Connected to PostgreSQL {DB_HOST}:{DB_PORT}/{DB_NAME}")
+    logger.info(
+        f"✅ Connected to PostgreSQL {DB_SETTINGS.host}:"
+        f"{DB_SETTINGS.port}/{DB_SETTINGS.database}"
+    )
     
     # Period for historical data
     end_date = datetime.now()

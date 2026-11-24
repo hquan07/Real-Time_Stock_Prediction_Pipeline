@@ -1,10 +1,12 @@
 from pyspark.sql import SparkSession, DataFrame
+from config.settings import DatabaseSettings
 
 
-POSTGRES_URL = "jdbc:postgresql://postgres:5432/stockdb"
+DB_SETTINGS = DatabaseSettings.from_env()
+POSTGRES_URL = DB_SETTINGS.jdbc_url
 POSTGRES_TABLE = "stock_prices"
-POSTGRES_USER = "postgres"
-POSTGRES_PASSWORD = "Huyquan1607"
+POSTGRES_USER = DB_SETTINGS.user
+POSTGRES_PASSWORD = DB_SETTINGS.password
 
 
 def create_spark_session(app_name="KafkaSparkWriter") -> SparkSession:

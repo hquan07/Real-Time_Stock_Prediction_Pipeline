@@ -3,19 +3,20 @@ Batch ETL Pipeline for Stock Data.
 Processes historical data from PostgreSQL and computes technical indicators.
 """
 
-import os
 from typing import Optional
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
+from config.settings import DatabaseSettings
 
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-POSTGRES_URL = os.getenv("POSTGRES_URL", "jdbc:postgresql://postgres:5432/stockdb")
-POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "Huyquan1607")
+DB_SETTINGS = DatabaseSettings.from_env()
+POSTGRES_URL = DB_SETTINGS.jdbc_url
+POSTGRES_USER = DB_SETTINGS.user
+POSTGRES_PASSWORD = DB_SETTINGS.password
 
 
 def create_spark_session(app_name: str = "BatchETL") -> SparkSession:
