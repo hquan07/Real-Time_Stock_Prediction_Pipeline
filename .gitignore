@@ -1,4 +1,5 @@
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 venv/
@@ -8,6 +9,8 @@ logs/
 backups/
 notebooks/.ipynb_checkpoints/
 .env
+.env.*
+!.env.example
 node_modules/
 .DS_Store
 .idea/
