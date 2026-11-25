@@ -19,22 +19,87 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
       - name: Install lightweight test dependencies
-        run: >-
-          python -m pip install -r requirements-base.txt
-          pytest==8.3.1 pytest-timeout==2.3.1
+        run: python -m pip install -r requirements-base.txt -r requirements-dev.txt scikit-learn==1.7.2 joblib==1.5.2
       - name: Validate repository and Compose
+        env:
+          PYTHONPATH: packages/pipeline/src:src
         run: |
           ./scripts/ci/check_secrets.sh
-          python -m compileall -q src services scripts tests
+          python -m compileall -q packages/pipeline/src src services scripts tests orchestration
+          python scripts/ci/validate_structured_files.py
+          ruff check --select E9,F63,F7,F82 packages/pipeline/src src services scripts tests orchestration
           docker compose --env-file .env.example config --quiet
-      - name: Run configuration and database unit tests
+      - name: Run unit tests
         env:
           POSTGRES_PASSWORD: test-only-placeholder
+          PYTHONPATH: packages/pipeline/src:src
         run: >-
-          python -m pytest -c tests/pytest.ini
-          tests/unit/test_settings.py
-          tests/unit/test_db_connection.py
+          python -m pytest -c tests/pytest.ini tests/unit
+          --ignore=tests/unit/test_batch_etl.py
+          --ignore=tests/unit/test_transformations.py
+      - name: Audit Python dependencies
+        run: |
+          pip-audit -r requirements-base.txt
+          pip-audit -r services/api/requirements.txt
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: stockdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-placeholder
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install psycopg2-binary==2.9.11
+      - name: Apply, roll back, and reapply migrations
+        env:
+          PYTHONPATH: packages/pipeline/src
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: stockdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-placeholder
+        run: |
+          python scripts/migrate.py up
+          python scripts/migrate.py down
+          python scripts/migrate.py up
+
+  spark-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build pinned Spark image
+        run: docker build --tag stock-spark:${{ github.sha }} --file infrastructure/docker/spark/Dockerfile .
+      - name: Run Spark unit and local integration tests
+        run: >-
+          docker run --rm --user spark
+          --volume "$PWD:/workspace:ro"
+          --workdir /workspace
+          --env SPARK_HOME=/opt/spark
+          --env PYTHONPATH=/opt/spark/python/lib/pyspark.zip:/opt/spark/python/lib/py4j-0.10.9.7-src.zip:/workspace/packages/pipeline/src:/workspace/src
+          --env POSTGRES_PASSWORD=test-only-placeholder
+          stock-spark:${{ github.sha }}
+          python3 -m pytest -p no:cacheprovider -c tests/pytest.ini
+          tests/unit/test_batch_etl.py tests/unit/test_transformations.py
+          tests/integration/test_spark_local_job.py
 
   frontend:
     runs-on: ubuntu-latest
@@ -57,6 +122,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build dashboard images
+        run: |
+          docker build --tag stock-api:${{ github.sha }} --file infrastructure/docker/app/Dockerfile .
+          docker build --tag stock-web:${{ github.sha }} --file infrastructure/docker/frontend/Dockerfile .
+      - name: Verify API image excludes build tooling
         run: >-
-          docker compose --env-file .env.example build
-          dashboard-backend dashboard-frontend
+          docker run --rm stock-api:${{ github.sha }} python -c
+          "from importlib.util import find_spec;
+          assert find_spec('pip') is None;
+          assert find_spec('setuptools') is None"
+      - name: Scan API image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: stock-api:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: stock-web:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+      - name: Smoke test dashboard stack
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker compose --env-file .env.example up --detach postgres kafka redis dashboard-backend dashboard-frontend
+          docker compose --env-file .env.example exec -T dashboard-backend python -c "from stock_pipeline.db.migrations import apply_migrations; print(apply_migrations())"
+          timeout 180 bash -c 'until ./scripts/ci/smoke_dashboard.sh; do sleep 5; done'
+      - name: Collect container diagnostics
+        if: failure()
+        run: docker compose --env-file .env.example logs --no-color --tail=200 dashboard-backend dashboard-frontend postgres kafka redis
+      - name: Stop smoke stack
+        if: always()
+        run: docker compose --env-file .env.example down --volumes

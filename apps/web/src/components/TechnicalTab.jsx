@@ -1,29 +1,45 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TechnicalIndicators from './TechnicalIndicators';
 import { apiClient } from '../config/api';
+import { DataProvenance, EmptyState, ErrorState } from './QueryState';
 
 const TechnicalTab = () => {
   const [tickers, setTickers] = useState([]);
-  const [selectedTicker, setSelectedTicker] = useState('AAPL');
+  const [selectedTicker, setSelectedTicker] = useState('');
   const [stockData, setStockData] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Fetch Tickers
   useEffect(() => {
     apiClient.get('/tickers')
-      .then(res => setTickers(res.data))
-      .catch(err => console.error(err));
+      .then(res => {
+        const options = res.data?.data || [];
+        setTickers(options);
+        setSelectedTicker(current => current || options[0]?.value || '');
+        if (options.length === 0) setLoading(false);
+      })
+      .catch(err => {
+        setError(err?.response?.data?.detail || 'Ticker catalog unavailable.');
+        setLoading(false);
+      });
   }, []);
 
   const fetchStockData = useCallback(async () => {
+    if (!selectedTicker) return;
+    setLoading(true);
+    setError(null);
     try {
       const response = await apiClient.get(`/stock/${selectedTicker}`, {
         params: { period: '6M' },
       });
-      setStockData(response.data);
+      setStockData(response.data?.data || []);
+      setMeta(response.data?.meta || null);
     } catch (error) {
-      console.error(error);
       setStockData([]);
+      setMeta(null);
+      setError(error?.response?.data?.detail || 'Technical data unavailable.');
     } finally {
       setLoading(false);
     }
@@ -48,6 +64,7 @@ const TechnicalTab = () => {
         <select 
           value={selectedTicker}
           onChange={handleTickerChange}
+          disabled={tickers.length === 0}
           style={{ 
             background: 'rgba(0,0,0,0.3)', color: '#fff', 
             border: '1px solid rgba(255,255,255,0.1)', 
@@ -61,10 +78,16 @@ const TechnicalTab = () => {
         </select>
       </div>
 
+      <DataProvenance meta={meta} />
+
       {loading ? (
         <div className="glass-card" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ color: '#6366f1', fontSize: '20px', fontWeight: 500, animation: 'pulse 1.5s infinite' }}>Loading Data...</div>
         </div>
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchStockData} />
+      ) : stockData.length === 0 ? (
+        <EmptyState message="No validated technical data is available for this ticker." />
       ) : (
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           <TechnicalIndicators data={stockData} />

@@ -4,11 +4,11 @@ Called by yfinance_pipeline_dag.py
 """
 
 import sys
-import os
+from pathlib import Path
 from datetime import datetime
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
+PACKAGE_ROOT = Path(__file__).resolve().parents[1] / "packages/pipeline/src"
+sys.path.insert(0, str(PACKAGE_ROOT))
 
 from loguru import logger
 
@@ -31,10 +31,10 @@ def run_fetch(
     Returns:
         Dict with execution stats.
     """
-    from src.data_ingestion.fetcher.tickers import get_ticker_list
-    from src.data_ingestion.fetcher.price import fetch_price
-    from src.data_ingestion.fetcher.dividends import fetch_dividends
-    from src.database.write_raw import write_price_history, write_dividend
+    from stock_pipeline.ingestion.fetcher.tickers import get_ticker_list
+    from stock_pipeline.ingestion.fetcher.price import fetch_price
+    from stock_pipeline.ingestion.fetcher.dividends import fetch_dividends
+    from stock_pipeline.db.write_raw import write_price_history, write_dividend
 
     start_time = datetime.now()
     stats = {
@@ -49,8 +49,7 @@ def run_fetch(
         try:
             tickers = get_ticker_list()[:limit]
         except Exception as e:
-            logger.warning(f"Could not fetch ticker list: {e}")
-            tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"][:limit]
+            raise RuntimeError("Could not fetch the configured ticker universe") from e
 
     logger.info(f"🚀 Starting data fetch for {len(tickers)} tickers")
 

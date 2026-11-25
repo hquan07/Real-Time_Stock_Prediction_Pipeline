@@ -1,73 +1,93 @@
 import { create } from 'zustand';
 import { apiClient } from '../config/api';
 
+const messageFrom = (error, fallback) => error?.response?.data?.detail || fallback;
+
 const useStore = create((set) => ({
-    // Tickers State
-    tickers: [{ label: 'Apple Inc. (AAPL)', value: 'AAPL' }],
-    selectedTicker: 'AAPL',
+    tickers: [],
+    selectedTicker: '',
     isLoadingTickers: false,
-    
-    // Historical Data State
+    tickersError: null,
+
     historicalData: [],
+    historicalMeta: null,
+    historicalError: null,
     isLoadingHistorical: false,
     historicalPeriod: '3M',
-    
-    // ML Data State
+
     predictionsData: { historical: [], future: [] },
     featureImportance: [],
+    mlMeta: null,
+    mlError: null,
     isLoadingML: false,
-    
-    // Actions
+
     setSelectedTicker: (ticker) => set({ selectedTicker: ticker }),
     setHistoricalPeriod: (period) => set({ historicalPeriod: period }),
-    
+
     fetchTickers: async () => {
-        set({ isLoadingTickers: true });
+        set({ isLoadingTickers: true, tickersError: null });
         try {
             const response = await apiClient.get('/tickers');
-            if (response.data && response.data.length > 0) {
-                set({ tickers: response.data, isLoadingTickers: false });
-            } else {
-                set({ isLoadingTickers: false });
-            }
+            const tickers = response.data?.data || [];
+            set((state) => ({
+                tickers,
+                selectedTicker: state.selectedTicker || tickers[0]?.value || '',
+                isLoadingTickers: false,
+            }));
         } catch (error) {
-            console.error('Failed to fetch tickers', error);
-            set({ isLoadingTickers: false });
+            set({
+                tickers: [],
+                selectedTicker: '',
+                tickersError: messageFrom(error, 'Ticker catalog unavailable.'),
+                isLoadingTickers: false,
+            });
         }
     },
-    
+
     fetchHistoricalData: async (ticker, period) => {
-        set({ isLoadingHistorical: true });
+        if (!ticker) return;
+        set({ isLoadingHistorical: true, historicalError: null });
         try {
             const response = await apiClient.get(`/stock/${ticker}`, { params: { period } });
-            set({ historicalData: response.data, isLoadingHistorical: false });
+            set({
+                historicalData: response.data?.data || [],
+                historicalMeta: response.data?.meta || null,
+                isLoadingHistorical: false,
+            });
         } catch (error) {
-            console.error('Failed to fetch historical data', error);
-            set({ historicalData: [], isLoadingHistorical: false });
+            set({
+                historicalData: [],
+                historicalMeta: null,
+                historicalError: messageFrom(error, 'Market data unavailable.'),
+                isLoadingHistorical: false,
+            });
         }
     },
-    
+
     fetchMLData: async (ticker) => {
-        set({ isLoadingML: true });
+        if (!ticker) return;
+        set({ isLoadingML: true, mlError: null });
         try {
-            const [predRes, featRes] = await Promise.all([
-                apiClient.get(`/predictions/${ticker}`, { params: { model: 'RandomForest' } }),
-                apiClient.get(`/feature-importance/${ticker}`)
+            const [predictionResponse, importanceResponse] = await Promise.all([
+                apiClient.get(`/predictions/${ticker}`, { params: { model: 'random_forest' } }),
+                apiClient.get(`/feature-importance/${ticker}`),
             ]);
-            set({ 
-                predictionsData: predRes.data || { historical: [], future: [] },
-                featureImportance: featRes.data || [],
-                isLoadingML: false 
+            set({
+                predictionsData: predictionResponse.data?.data || { historical: [], future: [] },
+                featureImportance: importanceResponse.data?.data || [],
+                mlMeta: predictionResponse.data?.meta || null,
+                isLoadingML: false,
             });
         } catch (error) {
-            console.error('Failed to fetch ML data', error);
-            set({ 
+            set({
                 predictionsData: { historical: [], future: [] },
                 featureImportance: [],
-                isLoadingML: false 
+                mlMeta: null,
+                mlError: messageFrom(error, 'Validated model output unavailable.'),
+                isLoadingML: false,
             });
         }
-    }
+    },
 }));
 
 export default useStore;

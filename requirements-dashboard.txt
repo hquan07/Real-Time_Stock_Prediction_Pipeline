@@ -1,5 +1,6 @@
 -r requirements-base.txt
-dash==3.3.0
-plotly==6.5.0
-scikit-learn==1.7.2
-joblib==1.5.2
+-c constraints-python.txt
+dash
+plotly
+scikit-learn
+joblib

@@ -10,11 +10,12 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+PACKAGE_ROOT = PROJECT_ROOT / "packages/pipeline/src"
+if str(PACKAGE_ROOT) not in sys.path:
+    sys.path.insert(0, str(PACKAGE_ROOT))
 
-from integrations.cloudvault import CloudVaultClient, CloudVaultConfig
-from integrations.model_artifacts import (
+from stock_pipeline.integrations.cloudvault import CloudVaultClient, CloudVaultConfig
+from stock_pipeline.integrations.model_artifacts import (
     ModelValidationPolicy,
     latest_registry_version,
     publish_model_bundle,
@@ -22,7 +23,7 @@ from integrations.model_artifacts import (
 )
 
 
-DEFAULT_REGISTRY_DIR = PROJECT_ROOT / "src/machine_learning/artifacts/registry"
+DEFAULT_REGISTRY_DIR = PROJECT_ROOT / "artifacts/model-registry"
 
 
 def _enabled() -> bool:

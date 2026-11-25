@@ -1,6 +1,6 @@
 import asyncpg
 from loguru import logger
-from config.settings import DatabaseSettings
+from stock_pipeline.config.settings import DatabaseSettings
 
 async def get_db_pool():
     settings = DatabaseSettings.from_env()

@@ -1,22 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Activity } from 'lucide-react';
 import { apiClient } from '../config/api';
+import { DataProvenance, EmptyState, ErrorState } from './QueryState';
 
 const PortfolioTab = () => {
   const [portfolio, setPortfolio] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchPortfolio = () => {
+    setLoading(true);
+    setError(null);
     // Assuming 'default_user' for now as per backend implementation
     apiClient.get('/portfolio/default_user')
       .then(res => {
-        setPortfolio(res.data);
+        setPortfolio(res.data?.data || []);
+        setMeta(res.data?.meta || null);
         setLoading(false);
       })
       .catch(err => {
-        console.error(err);
+        setPortfolio([]);
+        setMeta(null);
+        setError(err?.response?.data?.detail || 'Paper portfolio unavailable.');
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- synchronize remote paper portfolio on mount
+    fetchPortfolio();
   }, []);
 
   // Calculate summary metrics
@@ -28,8 +41,12 @@ const PortfolioTab = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="glass-card" style={{ color: '#f59e0b', fontSize: '14px' }}>
+        Local paper portfolio for research only. User authentication and trading execution are disabled.
+      </div>
+      <DataProvenance meta={meta} />
       {/* Summary Cards */}
-      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+      {!loading && !error && portfolio.length > 0 && <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
         <div className="glass-card" style={{ flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '12px' }}>
             <DollarSign size={24} color="#6366f1" />
@@ -54,7 +71,7 @@ const PortfolioTab = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Portfolio Table */}
       <div className="glass-card" style={{ overflowX: 'auto' }}>
@@ -62,8 +79,10 @@ const PortfolioTab = () => {
         
         {loading ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#6366f1', animation: 'pulse 1.5s infinite' }}>Loading Portfolio...</div>
+        ) : error ? (
+          <ErrorState message={error} onRetry={fetchPortfolio} />
         ) : portfolio.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No holdings found in portfolio.</div>
+          <EmptyState message="No paper holdings are available for this local research user." />
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>

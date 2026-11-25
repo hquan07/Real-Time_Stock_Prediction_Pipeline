@@ -1,166 +1,245 @@
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Query, Request
-from typing import List, Dict, Any
-import pandas as pd
 from loguru import logger
+import pandas as pd
+
 from services.data_service import fetch_stock_data
 from services.redis_cache import get_cached_data, set_cached_data
 
+
 router = APIRouter()
+
+
+def _as_utc(value) -> pd.Timestamp:
+    timestamp = pd.Timestamp(value)
+    if timestamp.tzinfo is None:
+        return timestamp.tz_localize("UTC")
+    return timestamp.tz_convert("UTC")
+
+
+def _base_meta(**extra) -> dict:
+    return {
+        "source": None,
+        "as_of": None,
+        "timezone": "UTC",
+        "exchange_timezone": "America/New_York",
+        "market_status": "unknown",
+        "stale": None,
+        **extra,
+    }
+
+
+def _market_status() -> str:
+    try:
+        import exchange_calendars as xcals
+
+        now = pd.Timestamp.now(tz="UTC")
+        calendar = xcals.get_calendar("XNYS")
+        return "open" if calendar.is_open_on_minute(now, ignore_breaks=True) else "closed"
+    except Exception as exc:
+        logger.warning(f"Could not calculate market status: {exc}")
+        return "unknown"
+
 
 @router.get("/tickers")
 async def get_active_tickers(request: Request):
     pool = getattr(request.app.state, "pool", None)
     if not pool:
-        raise HTTPException(status_code=500, detail="Database connection pool missing")
-    
-    cache_key = "api:tickers:active"
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    cache_key = "api:tickers:active:v2"
     cached = await get_cached_data(cache_key)
     if cached:
         return cached
 
     try:
-        query = "SELECT ticker, long_name FROM companies WHERE is_active = true ORDER BY ticker ASC"
-        async with pool.acquire() as conn:
-            records = await conn.fetch(query)
-            
-        result = [{"label": f"{r['long_name']} ({r['ticker']})", "value": r["ticker"]} for r in records]
-        
-        # Cache for 1 hour
+        query = "SELECT ticker, long_name FROM companies WHERE is_active = true ORDER BY ticker"
+        async with pool.acquire() as connection:
+            records = await connection.fetch(query)
+        result = {
+            "data": [
+                {"label": f"{row['long_name'] or row['ticker']} ({row['ticker']})", "value": row["ticker"]}
+                for row in records
+            ],
+            "meta": _base_meta(source="database", market_status=_market_status()),
+        }
         await set_cached_data(cache_key, result, expire=3600)
         return result
-    except Exception as e:
-        logger.error(f"Failed to fetch tickers: {e}")
-        return [{"label": "Apple Inc. (AAPL)", "value": "AAPL"}]
+    except Exception as exc:
+        logger.error(f"Failed to fetch tickers: {exc}")
+        raise HTTPException(status_code=503, detail="Ticker catalog unavailable") from exc
+
 
 @router.get("/stock/{ticker}")
-async def get_stock_data(request: Request, ticker: str, period: str = Query("3M", alias="period")):
+async def get_stock_data(
+    request: Request, ticker: str, period: str = Query("3M", alias="period")
+):
     pool = getattr(request.app.state, "pool", None)
-    cache_key = f"api:stock:{ticker}:{period}"
-    
+    if not pool:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    ticker = ticker.upper()
+    cache_key = f"api:stock:v2:{ticker}:{period}"
     cached = await get_cached_data(cache_key)
     if cached:
         return cached
 
-    df = await fetch_stock_data(pool, ticker, period)
-    if df.empty:
-        return []
-    
-    # Convert dates to string for JSON serialization
-    if 'date' in df.columns:
-        df['date'] = df['date'].astype(str)
-        
-    result = df.to_dict(orient="records")
-    # Cache for 5 minutes
-    await set_cached_data(cache_key, result, expire=300)
-    return result
+    try:
+        frame = await fetch_stock_data(pool, ticker, period)
+        if frame.empty:
+            return {
+                "data": [],
+                "state": "empty",
+                "meta": _base_meta(period=period, market_status=_market_status()),
+            }
+
+        latest = frame.iloc[-1]
+        as_of = _as_utc(latest["event_time"])
+        interval = latest.get("interval") or "1d"
+        stale_after_seconds = 36 * 3600 if interval == "1d" else 15 * 60
+        age_seconds = max(
+            0, (datetime.now(timezone.utc) - as_of.to_pydatetime()).total_seconds()
+        )
+        meta = _base_meta(
+            source=latest.get("source"),
+            as_of=as_of.isoformat(),
+            exchange_timezone=latest.get("exchange_timezone") or "America/New_York",
+            market_status=_market_status(),
+            stale=age_seconds > stale_after_seconds,
+            age_seconds=int(age_seconds),
+            interval=interval,
+            schema_version=int(latest.get("schema_version") or 0),
+            period=period,
+        )
+        serializable = frame.copy()
+        for column in ("date", "event_time"):
+            if column in serializable:
+                serializable[column] = serializable[column].astype(str)
+        serializable = serializable.where(pd.notna(serializable), None)
+        result = {"data": serializable.to_dict(orient="records"), "state": "ready", "meta": meta}
+        await set_cached_data(cache_key, result, expire=300)
+        return result
+    except Exception as exc:
+        logger.error(f"Failed to fetch stock data: {exc}")
+        raise HTTPException(status_code=503, detail="Market data unavailable") from exc
+
 
 @router.get("/portfolio/{user_id}")
-async def get_portfolio(request: Request, user_id: str = "default_user"):
+async def get_portfolio(request: Request, user_id: str):
     pool = getattr(request.app.state, "pool", None)
     if not pool:
-        return []
-        
-    cache_key = f"api:portfolio:{user_id}"
-    cached = await get_cached_data(cache_key)
-    if cached:
-        return cached
-
+        raise HTTPException(status_code=503, detail="Database unavailable")
     try:
         query = """
-            WITH LatestPrices AS (
-                SELECT ticker, close as current_price
-                FROM (
-                    SELECT ticker, close, ROW_NUMBER() OVER(PARTITION BY ticker ORDER BY event_time DESC) as rn
-                    FROM stock_prices_stream
-                ) tmp
-                WHERE rn = 1
+            WITH latest_prices AS (
+                SELECT DISTINCT ON (ticker) ticker, close AS current_price, event_time
+                FROM stock_prices_stream ORDER BY ticker, event_time DESC
             )
-            SELECT 
-                p.ticker,
-                p.shares as quantity,
-                p.avg_price as average_price,
-                COALESCE(lp.current_price, p.avg_price) as current_price
-            FROM portfolio p
-            LEFT JOIN LatestPrices lp ON p.ticker = lp.ticker
+            SELECT p.ticker, p.shares AS quantity, p.avg_price AS average_price,
+                   COALESCE(lp.current_price, p.avg_price) AS current_price,
+                   lp.event_time AS data_as_of
+            FROM portfolio p LEFT JOIN latest_prices lp USING (ticker)
             WHERE p.user_id = $1
         """
-        async with pool.acquire() as conn:
-            records = await conn.fetch(query, user_id)
-            
-        if records:
-            df = pd.DataFrame([dict(r) for r in records])
-            df["quantity"] = pd.to_numeric(df["quantity"], errors='coerce')
-            df["average_price"] = pd.to_numeric(df["average_price"], errors='coerce')
-            df["current_price"] = pd.to_numeric(df["current_price"], errors='coerce')
-            df["total_cost"] = df["quantity"] * df["average_price"]
-            df["total_value"] = df["quantity"] * df["current_price"]
-            df["unrealized_pnl"] = df["total_value"] - df["total_cost"]
-            df.fillna(0, inplace=True)
-            
-            result = df.to_dict(orient="records")
-            # Cache for 1 minute (portfolio changes often based on real-time prices)
-            await set_cached_data(cache_key, result, expire=60)
-            return result
-        return []
-    except Exception as e:
-        logger.error(f"Failed to fetch portfolio: {e}")
-        return []
+        async with pool.acquire() as connection:
+            records = await connection.fetch(query, user_id)
+        data = []
+        timestamps = []
+        for row in records:
+            item = dict(row)
+            quantity = float(item["quantity"])
+            average_price = float(item["average_price"])
+            current_price = float(item["current_price"])
+            item.update(
+                quantity=quantity,
+                average_price=average_price,
+                current_price=current_price,
+                total_cost=quantity * average_price,
+                total_value=quantity * current_price,
+                unrealized_pnl=quantity * (current_price - average_price),
+            )
+            if item.get("data_as_of") is not None:
+                as_of = _as_utc(item["data_as_of"])
+                timestamps.append(as_of)
+                item["data_as_of"] = as_of.isoformat()
+            data.append(item)
+
+        latest_as_of = max(timestamps).isoformat() if timestamps else None
+        return {
+            "data": data,
+            "state": "ready" if data else "empty",
+            "meta": _base_meta(
+                source="database" if data else None,
+                as_of=latest_as_of,
+                market_status=_market_status(),
+                research_only=True,
+            ),
+        }
+    except Exception as exc:
+        logger.error(f"Failed to fetch portfolio: {exc}")
+        raise HTTPException(status_code=503, detail="Portfolio unavailable") from exc
+
 
 @router.get("/predictions/{ticker}")
-async def get_predictions(request: Request, ticker: str, model: str = Query("RandomForest")):
+async def get_predictions(
+    request: Request, ticker: str, model: str = Query("random_forest")
+):
     pool = getattr(request.app.state, "pool", None)
     if not pool:
-        return {}
-    
-    cache_key = f"api:predictions:{ticker}:{model}"
-    cached = await get_cached_data(cache_key)
-    if cached:
-        return cached
-        
+        raise HTTPException(status_code=503, detail="Database unavailable")
     try:
         query = """
-            SELECT prediction_date, predicted_price as predicted_close, actual_price as actual_close
-            FROM predictions 
-            WHERE ticker = $1 AND model_type = $2
+            SELECT prediction_date, target_date, predicted_close, predicted_return,
+                   confidence, uncertainty_validated, model_version, created_at
+            FROM predictions
+            WHERE ticker = $1 AND lower(model_name) = lower($2)
             ORDER BY prediction_date ASC
         """
-        async with pool.acquire() as conn:
-            records = await conn.fetch(query, ticker, model)
-            
-        if not records:
-            return {"historical": [], "future": []}
-            
-        df = pd.DataFrame([dict(r) for r in records])
-        df['prediction_date'] = df['prediction_date'].astype(str)
-        df.fillna(0, inplace=True)
-        
-        result = {"historical": df.to_dict(orient="records"), "future": []}
-        # Cache for 30 minutes since predictions don't change often
-        await set_cached_data(cache_key, result, expire=1800)
-        return result
-    except Exception as e:
-        logger.error(f"Failed to fetch predictions: {e}")
-        return {}
+        async with pool.acquire() as connection:
+            records = await connection.fetch(query, ticker.upper(), model)
+        data = []
+        for row in records:
+            item = dict(row)
+            for field in ("prediction_date", "target_date", "created_at"):
+                if item.get(field) is not None:
+                    item[field] = item[field].isoformat()
+            data.append(item)
+        latest = data[-1] if data else {}
+        return {
+            "data": {"historical": data, "future": []},
+            "state": "ready" if data else "empty",
+            "meta": _base_meta(
+                source="model_registry" if data else None,
+                as_of=latest.get("created_at"),
+                model_version=latest.get("model_version"),
+                uncertainty_validated=bool(latest.get("uncertainty_validated", False)),
+                research_only=True,
+            ),
+        }
+    except Exception as exc:
+        logger.error(f"Failed to fetch predictions: {exc}")
+        raise HTTPException(status_code=503, detail="Predictions unavailable") from exc
+
 
 @router.get("/feature-importance/{ticker}")
-async def get_feature_importance(request: Request, ticker: str):
-    import os
-    import json
-    
-    # Check for specific ticker first, then fallback to ALL
-    model_dir = os.path.join(os.path.dirname(__file__), "..", "..", "machine_learning", "models")
-    
-    ticker_file = os.path.join(model_dir, f"feature_importance_{ticker}.json")
-    all_file = os.path.join(model_dir, "feature_importance_ALL.json")
-    
-    target_file = ticker_file if os.path.exists(ticker_file) else all_file
-    
-    if os.path.exists(target_file):
-        try:
-            with open(target_file, "r") as f:
-                return json.load(f)
-        except Exception as e:
-            logger.error(f"Error reading feature importance: {e}")
-            return []
-    
-    return []
+async def get_feature_importance(ticker: str):
+    model_dir = Path(os.getenv("MODEL_REPORT_DIR", "artifacts/model-reports"))
+    candidates = [
+        model_dir / f"feature_importance_{ticker.upper()}.json",
+        model_dir / "feature_importance_ALL.json",
+    ]
+    target = next((path for path in candidates if path.exists()), None)
+    if target is None:
+        return {
+            "data": [],
+            "state": "empty",
+            "meta": _base_meta(reason="No validated feature-importance artifact"),
+        }
+    try:
+        return {"data": json.loads(target.read_text()), "state": "ready", "meta": _base_meta(source="model_registry")}
+    except Exception as exc:
+        logger.error(f"Error reading feature importance: {exc}")
+        raise HTTPException(status_code=500, detail="Invalid feature-importance artifact") from exc

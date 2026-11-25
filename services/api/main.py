@@ -1,11 +1,7 @@
 import os
-import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-
-# Add project root to path for imports if needed
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from contextlib import asynccontextmanager
 import asyncio
@@ -13,7 +9,7 @@ from api.routes import router
 from api.ws import router as ws_router, consume_kafka
 from core.database import get_db_pool
 from services.redis_cache import redis_client
-from config.settings import cors_origins
+from stock_pipeline.config.settings import cors_origins
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

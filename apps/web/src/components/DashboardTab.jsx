@@ -4,6 +4,7 @@ import StatCard from './StatCard';
 import PriceChart from './PriceChart';
 import VolumeProfile from './VolumeProfile';
 import { createWebSocketUrl } from '../config/api';
+import { DataProvenance, EmptyState, ErrorState } from './QueryState';
 
 const DashboardTab = () => {
   const { 
@@ -12,13 +13,18 @@ const DashboardTab = () => {
     setSelectedTicker, 
     historicalData, 
     isLoadingHistorical, 
+    isLoadingTickers,
+    tickersError,
+    historicalError,
+    historicalMeta,
     fetchTickers, 
     fetchHistoricalData,
     historicalPeriod,
     fetchMLData
   } = useStore();
 
-  const [realtimeData, setRealtimeData] = useState([]);
+  const [liveTick, setLiveTick] = useState(null);
+  const [streamState, setStreamState] = useState('connecting');
 
   // Initial load
   useEffect(() => {
@@ -36,63 +42,34 @@ const DashboardTab = () => {
   // WebSocket for Realtime ticks
   useEffect(() => {
     const ws = new WebSocket(createWebSocketUrl('/api/ws/stream'));
+
+    ws.onopen = () => setStreamState('connected');
+    ws.onerror = () => setStreamState('unavailable');
+    ws.onclose = () => setStreamState('disconnected');
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'tick' && data.ticker === selectedTicker) {
-        setRealtimeData(prev => {
-          const newData = [...prev];
-          
-          // Get last known RSI/MACD from historical or previous real-time
-          let lastRSI = 0;
-          let lastMACD = 0;
-          
-          if (newData.length > 0) {
-            lastRSI = newData[newData.length - 1].rsi || 0;
-            lastMACD = newData[newData.length - 1].macd || 0;
-          } else if (historicalData.length > 0) {
-            lastRSI = historicalData[historicalData.length - 1].rsi || 0;
-            lastMACD = historicalData[historicalData.length - 1].macd || 0;
-          }
-          
-          newData.push({
-            date: new Date(data.timestamp).toISOString(),
-            close: data.price,
-            open: data.price,
-            high: data.price,
-            low: data.price,
-            volume: 0,
-            rsi: lastRSI,
-            macd: lastMACD
-          });
-          
-          // Keep only last 100 realtime ticks in memory to avoid bloat
-          if (newData.length > 100) newData.shift();
-          
-          return newData;
-        });
+        setLiveTick({ price: data.price, timestamp: data.timestamp });
       }
     };
     
     return () => {
       ws.close();
     };
-  }, [selectedTicker, historicalData]);
-
-  // Combine historical and real-time data for the chart
-  const combinedData = [...historicalData, ...realtimeData];
+  }, [selectedTicker]);
 
   // Calculate stats from latest data
-  const latest = combinedData.length > 0 ? combinedData[combinedData.length - 1] : null;
-  const previous = combinedData.length > 1 ? combinedData[combinedData.length - 2] : null;
+  const latest = historicalData.length > 0 ? historicalData[historicalData.length - 1] : null;
+  const previous = historicalData.length > 1 ? historicalData[historicalData.length - 2] : null;
   
-  const currentPrice = latest ? latest.close : 0;
-  const dailyChange = latest && previous ? ((latest.close - previous.close) / previous.close) * 100 : 0;
-  const currentVolume = latest ? latest.volume : 0;
-  const currentRSI = latest ? latest.rsi : 0;
+  const currentPrice = liveTick?.price ?? latest?.close;
+  const dailyChange = latest && previous ? ((latest.close - previous.close) / previous.close) * 100 : undefined;
+  const currentVolume = latest?.volume;
+  const currentRSI = latest?.rsi;
 
   const handleTickerChange = (event) => {
-    setRealtimeData([]);
+    setLiveTick(null);
     setSelectedTicker(event.target.value);
   };
 
@@ -101,9 +78,10 @@ const DashboardTab = () => {
       {/* Control Panel */}
       <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <h3 style={{ margin: 0, fontSize: '16px' }}>Select Ticker:</h3>
-        <select 
+        <select
           value={selectedTicker}
           onChange={handleTickerChange}
+          disabled={isLoadingTickers || tickers.length === 0}
           style={{ 
             background: 'rgba(0,0,0,0.3)', color: '#fff', 
             border: '1px solid rgba(255,255,255,0.1)', 
@@ -115,26 +93,36 @@ const DashboardTab = () => {
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
+        <span style={{ marginLeft: 'auto', color: streamState === 'connected' ? '#86efac' : '#fbbf24', fontSize: '13px' }}>
+          Stream: {streamState}
+        </span>
       </div>
+
+      {tickersError && <ErrorState message={tickersError} onRetry={fetchTickers} />}
+      <DataProvenance meta={historicalMeta} />
 
       {/* Metrics Row */}
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-        <StatCard title="Current Price" value={currentPrice.toFixed(2)} prefix="$" change={dailyChange} />
-        <StatCard title="Trading Volume" value={(currentVolume / 1000000).toFixed(2)} suffix="M" />
-        <StatCard title="RSI (14d)" value={currentRSI ? currentRSI.toFixed(2) : "0.00"} change={currentRSI - 50} />
+        <StatCard title={liveTick ? "Live Price" : "Latest Close"} value={currentPrice !== undefined ? Number(currentPrice).toFixed(2) : 'Unavailable'} prefix={currentPrice !== undefined ? '$' : ''} change={dailyChange} />
+        <StatCard title="Trading Volume" value={currentVolume !== undefined ? (Number(currentVolume) / 1000000).toFixed(2) : 'Unavailable'} suffix={currentVolume !== undefined ? 'M' : ''} />
+        <StatCard title="RSI (14d)" value={currentRSI !== undefined && currentRSI !== null ? Number(currentRSI).toFixed(2) : 'Unavailable'} />
       </div>
 
-      {isLoadingHistorical && combinedData.length === 0 ? (
+      {isLoadingHistorical && historicalData.length === 0 ? (
         <div className="glass-card" style={{ height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ color: '#6366f1', fontSize: '20px', fontWeight: 500, animation: 'pulse 1.5s infinite' }}>Loading Data...</div>
         </div>
+      ) : historicalError ? (
+        <ErrorState message={historicalError} onRetry={() => fetchHistoricalData(selectedTicker, historicalPeriod)} />
+      ) : historicalData.length === 0 ? (
+        <EmptyState message="No validated market data is available for this ticker and period." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
           <div style={{ height: '600px' }}>
-            <PriceChart data={combinedData} ticker={selectedTicker} />
+            <PriceChart data={historicalData} ticker={selectedTicker} />
           </div>
           <div style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
-            <VolumeProfile data={combinedData} />
+            <VolumeProfile data={historicalData} />
           </div>
         </div>
       )}

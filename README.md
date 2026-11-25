@@ -1,260 +1,161 @@
-# 📈 Real-Time Stock Prediction Pipeline
+# Real-Time Stock Prediction Pipeline
 
-A comprehensive real-time stock prediction system using Apache Kafka, Spark, Machine Learning, and Deep Learning.
+Research-oriented stock data pipeline built with Kafka, Spark Structured
+Streaming, PostgreSQL, Airflow, FastAPI, React and scikit-learn.
 
-## 🏗️ Architecture
+P0 establishes a reproducible and fail-closed foundation. The dashboard shows
+data provenance and empty/error/stale states, model promotion requires beating
+a zero-return baseline on holdout and walk-forward evaluation, and generated
+signals are explicitly research-only. This repository is not an investment
+advisory or automated-trading product.
+
+## Architecture
 
 ```mermaid
 flowchart LR
-    A[YFinance API] --> B[Data Ingestion]
-    B --> C[Apache Kafka]
-    C --> D[Spark Streaming]
-    D --> E[PostgreSQL]
-    E --> F[ML/DL Models]
-    F --> G[Predictions]
-    G --> H[Dashboard]
-    I[Apache Airflow] -.-> B
-    I -.-> F
+    YF[yfinance] --> ING[Validated ingestion]
+    ING --> K[Kafka / Avro v2]
+    K --> S[Spark Structured Streaming]
+    S --> PG[(PostgreSQL)]
+    PG --> ML[Leakage-safe RF training]
+    ML --> REG[Local model registry]
+    PG --> API[FastAPI]
+    REG --> API
+    API --> WEB[React dashboard]
+    AF[Airflow] -. schedules .-> ING
+    AF -. schedules .-> ML
 ```
 
-## 🚀 Features
+## Repository layout
 
-- **Real-time Data Ingestion**: Fetch stock data from YFinance API
-- **Stream Processing**: Apache Kafka + Spark for real-time data processing
-- **Machine Learning**: RandomForest, XGBoost models for price prediction
-- **Deep Learning**: LSTM neural networks for time series forecasting
-- **Interactive Dashboard**: Real-time visualization with Plotly Dash
-- **Orchestration**: Apache Airflow for workflow management
-- **Containerized**: Docker Compose for easy deployment
-
-## 📁 Project Structure
-
-```
-Real-Time_Stock_Prediction_Pipeline/
-├── airflow/                    # Airflow DAGs and scripts
-│   ├── dags/                   # DAG definitions
-│   └── scripts/                # Callable scripts
-├── docker/                     # Docker configurations
-│   ├── airflow/                # Airflow Dockerfile
-│   ├── app/                    # App Dockerfile
-│   └── spark/                  # Spark Dockerfile
-├── notebooks/                  # Jupyter notebooks for EDA
-├── src/                        # Main source code
-│   ├── config/                 # Configuration files
-│   ├── dashboard/              # Dash web application
-│   ├── data_ingestion/         # Data fetching & Kafka producer
-│   ├── database/               # PostgreSQL connection & writes
-│   ├── deep_learning/          # LSTM models
-│   ├── machine_learning/       # ML training & inference
-│   ├── streaming/              # Spark streaming jobs
-│   └── utils/                  # Helper utilities
-├── tests/                      # Unit & integration tests
-├── docker-compose.yml          # Docker orchestration
-└── requirements.txt            # Python dependencies
+```text
+apps/web/                         React dashboard
+services/api/                     FastAPI dashboard API
+packages/pipeline/src/
+  stock_pipeline/                 Canonical Python application package
+orchestration/airflow/dags/       Thin Airflow orchestration definitions
+infrastructure/docker/            Runtime images
+infrastructure/compose/           Environment-specific Compose configuration
+infrastructure/migrations/        Versioned SQL migrations and rollbacks
+scripts/                          Thin CLI/operations adapters
+config/environments/              Sanitized environment templates
+tests/                            Unit and integration tests
+docs/                             Roadmap, ADRs, preflight and P0 evidence
+artifacts/                         Local runtime output; ignored by Git
 ```
 
-## 🛠️ Quick Start
+The namespaces under `src/` and `integrations/` are temporary compatibility
+adapters. New code must import from `stock_pipeline`.
 
-### Prerequisites
+## Quick start
 
-- Docker & Docker Compose
-- Python 3.10+
-- PostgreSQL 15
-
-### 1. Clone and Setup
+Prerequisites: Docker with Compose v2, Python 3.12 and Node.js 22.
 
 ```bash
-git clone <repository-url>
-cd Real-Time_Stock_Prediction_Pipeline
+cp .env.example .env
+# Replace every placeholder secret in .env before starting services.
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
+docker compose --env-file .env up -d postgres zookeeper kafka redis
+PYTHONPATH=packages/pipeline/src python scripts/migrate.py up
 
-# Install dependencies
-pip install -r requirements.txt
+docker compose --env-file .env up -d dashboard-backend dashboard-frontend
+./scripts/ci/smoke_dashboard.sh
 ```
 
-### 2. Configure Environment
+The dashboard is exposed only on `127.0.0.1:5173` by default and the API on
+`127.0.0.1:8000`. Override `DASHBOARD_PORT` in the ignored local `.env` when
+needed.
 
-Create a `.env` file in the root directory:
-
-```env
-# PostgreSQL
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_password
-POSTGRES_DB=stockdb
-POSTGRES_PORT=5432
-
-# Kafka
-KAFKA_BROKER_ID=1
-KAFKA_BROKER_PORT=9092
-KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-KAFKA_ADVERTISED_HOST_NAME=kafka
-
-# Spark
-SPARK_MASTER_HOST=spark-master
-
-# Airflow
-AIRFLOW__CORE__EXECUTOR=LocalExecutor
-AIRFLOW__CORE__LOAD_EXAMPLES=false
-AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://postgres:PG_PASSWORD@postgres:5432/airflow
-
-# Jupyter
-JUPYTER_TOKEN=your_token
-JUPYTER_PORT=8888
-```
-
-### 3. Start Services
+Start the streaming consumer after the database migration:
 
 ```bash
-# Start all services
-docker-compose up -d
-
-# Check status
-docker-compose ps
+docker compose --env-file .env up -d --build spark-consumer
+docker compose ps
+docker compose logs --tail=100 spark-consumer
 ```
 
-### 4. Initialize Database
+Run canonical application entrypoints from the host with the package on
+`PYTHONPATH`:
 
 ```bash
-# Run database initialization
-python -c "from src.database.db_connection import init_database; init_database()"
-```
-
-### 5. Run Components
-
-```bash
-# Run data ingestion
-python -m src.data_ingestion.main
-
-# Run the canonical dashboard in development
-cd apps/web && npm install && npm run dev
-
-# In another terminal, run the API
-cd services/api && uvicorn main:app --host 0.0.0.0 --port 8000
-
-# Train models & register to Model Registry
-python scripts/run_train.py --model random_forest
-
-# Generate trading signals (uses latest model from Registry)
-python scripts/signal_generator.py
-
-# Run inference stream
+export PYTHONPATH="$PWD/packages/pipeline/src:$PWD/src"
+python -m stock_pipeline.ingestion.main
+python scripts/run_train.py --model random_forest --days 90
 python scripts/run_inference.py
+python scripts/signal_generator.py
 ```
 
-### 6. MLOps & Signals Generation
-- **Model Registry:** Trained models are automatically saved in `src/machine_learning/artifacts/registry`. The signal generator will always fetch the `latest` model version from here.
-- **Signal Generator:** Calculates RSI and fetches predictions from the model to insert BUY/SELL/HOLD signals into the database. Airflow schedules this via `dags/signal_generation_dag.py`.
+Training and inference abort when validated data or an eligible model is
+unavailable. LSTM is retained as research code but is not promotion-eligible in
+P0.
 
-### 7. CloudVault Artifact Publishing
+## Database migrations
 
-CloudVault is an optional durable catalog for validated model bundles and compact daily signal reports. PostgreSQL, MLflow and the local model registry remain the operational sources; inference does not download models from CloudVault automatically.
-
-Create the shared Docker network and provision the `real-time-stock` project/service account in CloudVault first. The publisher needs `files:create`; manual restore also needs `files:read`.
+The migration runner records checksums and uses a PostgreSQL advisory lock.
 
 ```bash
-docker network create cloudvault-shared
+PYTHONPATH=packages/pipeline/src python scripts/migrate.py status
+PYTHONPATH=packages/pipeline/src python scripts/migrate.py up
+PYTHONPATH=packages/pipeline/src python scripts/migrate.py down
 ```
 
-Configure `.env` and enable each artifact type explicitly:
+Seed SQL is separate from schema migration and is never applied implicitly.
 
-```dotenv
-CLOUDVAULT_BASE_URL=http://cloudvault-api
-CLOUDVAULT_PROJECT_ID=real-time-stock
-CLOUDVAULT_SERVICE_TOKEN=<service-account-token>
-CLOUDVAULT_PUBLISH_ENABLED=true
-CLOUDVAULT_REPORT_PUBLISH_ENABLED=true
+## Dashboard contract
 
-# Optional model quality gates; keep empty until approved.
-CLOUDVAULT_MAX_TEST_RMSE=
-CLOUDVAULT_MAX_TEST_MAE=
+API responses use a stable `{data, state, meta}` envelope. Metadata includes
+source, as-of time, timezone, market state, staleness and model version where
+applicable. Missing data is reported as an empty state; database failures return
+an error instead of fabricated ticker, price, confidence or portfolio values.
+
+The legacy Dash UI under `src/dashboard/` is frozen. The supported product UI
+is `apps/web/`.
+
+## Validation
+
+```bash
+./scripts/ci/check_secrets.sh
+python scripts/ci/validate_structured_files.py
+python -m compileall -q packages/pipeline/src src services scripts tests orchestration
+docker compose --env-file .env.example config --quiet
+
+PYTHONPATH=packages/pipeline/src:src \
+  python -m pytest -c tests/pytest.ini tests/unit \
+  --ignore=tests/unit/test_batch_etl.py \
+  --ignore=tests/unit/test_transformations.py
+
+npm --prefix apps/web ci
+npm --prefix apps/web run lint
+npm --prefix apps/web run build
 ```
 
-The stock training DAG validates and publishes `model.pkl`, `scaler.pkl`, `metadata.json`, then uploads a catalog manifest containing their checksums and `file_id` values. The signal DAG publishes one deterministic JSON export per logical run. Upload failures leave local artifacts intact and write a local `cloudvault_publish.json` or `.cloudvault.json` status file for diagnosis/retry.
+Spark-specific tests run inside the pinned Spark image; the exact command is in
+`.github/workflows/p0-quality.yml`. CI also applies, rolls back and reapplies
+migrations, audits Python dependencies, scans built images and smoke-tests the
+dashboard.
 
-Restore is a manual, checksum-verified operation. It does not activate the downloaded version unless `--activate` is supplied:
+## Optional CloudVault publication
+
+CloudVault publication is disabled by default. It is a durable catalog for a
+validated model bundle and compact research-signal report; local PostgreSQL and
+the model registry remain operational sources. Configure its service account in
+the ignored `.env`, create the `cloudvault-shared` Docker network, then enable
+only the required publisher flag.
+
+Restore is manual and checksum-verified:
 
 ```bash
 docker compose exec airflow-scheduler \
   python /opt/airflow/scripts/restore_model.py \
   --manifest-file-id <manifest-file-id>
-
-docker compose exec airflow-scheduler \
-  python /opt/airflow/scripts/restore_model.py \
-  --manifest-file-id <manifest-file-id> \
-  --activate
-
-# Roll back by atomically selecting a retained, verified local version.
-docker compose exec airflow-scheduler \
-  python /opt/airflow/scripts/restore_model.py \
-  --rollback-to <previous-version>
 ```
 
-Restore validates the manifest, project boundary, exact bundle contents, size and SHA-256 before installing a version. It never unpickles downloaded content during verification, and activation retains the previous version directory for rollback.
+Use `--activate` only after review. Rollback selects an already verified local
+version with `--rollback-to <version>`.
 
-## 📊 Dashboard
+## Documentation
 
-The canonical React dashboard is available at `http://localhost:5173` when started with Docker Compose (override with `DASHBOARD_PORT`). The FastAPI/OpenAPI endpoint is available at `http://localhost:8000/docs`.
-
-The legacy Dash application under `src/dashboard` is frozen during P0 and is not the supported dashboard entrypoint.
-
-Features:
-- Real-time stock price charts (Candlestick/Line)
-- ML prediction visualization
-- Volume analysis
-- Model performance metrics
-
-## 🧪 Running Tests
-
-```bash
-# Validate Compose, committed secrets, Python syntax and frontend lint
-make lint
-
-# Run all tests
-python -m pytest -c tests/pytest.ini tests/ -v
-
-# Run unit tests only
-make test-unit
-
-# Run with coverage
-python -m pytest -c tests/pytest.ini tests/ --cov=src --cov-report=html
-
-# With the dashboard stack running
-make smoke-test
-```
-
-## 🔧 Services & Ports
-
-| Service | Port | URL |
-|---------|------|-----|
-| PostgreSQL | 5433 | localhost:5433 |
-| Kafka | 9092 | localhost:9092 |
-| Zookeeper | 2181 | localhost:2181 |
-| Spark Master | 7077, 8080 | http://localhost:8080 |
-| Spark Worker | 8082 | http://localhost:8082 |
-| Airflow | 8081 | http://localhost:8081 |
-| Jupyter | 8888 | http://localhost:8888 |
-| MLflow | 5000 | http://localhost:5000 |
-| Dashboard API | 8000 | http://localhost:8000/docs |
-| Dashboard | 5173 | http://localhost:5173 |
-
-## 📦 Key Dependencies
-
-- **Data**: pandas, numpy, yfinance
-- **Streaming**: kafka-python, pyspark
-- **ML**: scikit-learn, xgboost
-- **DL**: pytorch
-- **Database**: sqlalchemy, psycopg2
-- **Visualization**: dash, plotly
-- **Orchestration**: apache-airflow
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+- [Upgrade roadmap](docs/upgrade-roadmap.md)
+- [P0 implementation status](docs/p0-implementation-status.md)
+- [Canonical runtime ADR](docs/adr/0001-canonical-runtime-architecture.md)
+- [Preflight evidence and secret remediation](docs/preflight/README.md)

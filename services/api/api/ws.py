@@ -33,7 +33,7 @@ manager = ConnectionManager()
 
 # Load Avro Schema
 import os
-from config.settings import KafkaSettings
+from stock_pipeline.config.settings import KafkaSettings
 
 kafka_settings = KafkaSettings.from_env()
 with kafka_settings.schema_path.open("r") as f:

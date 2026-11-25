@@ -45,7 +45,8 @@ async def fetch_stock_data(pool, ticker: str, period: str = "3mo") -> pd.DataFra
             return pd.DataFrame()
             
         query = """
-            SELECT event_date as date, open, high, low, close, volume
+            SELECT event_date as date, event_time, open, high, low, close, volume,
+                   source, interval, exchange_timezone, schema_version
             FROM stock_prices_stream
             WHERE ticker = $1 AND event_date >= $2
             ORDER BY event_time ASC
@@ -58,7 +59,6 @@ async def fetch_stock_data(pool, ticker: str, period: str = "3mo") -> pd.DataFra
             df = df.drop_duplicates(subset=['date'], keep='last').reset_index(drop=True)
             df = calculate_indicators(df)
             # Ensure proper JSON serialization
-            df.fillna(0, inplace=True)
             return df
     except Exception as e:
         logger.error(f"PostgreSQL async fetch failed: {e}")

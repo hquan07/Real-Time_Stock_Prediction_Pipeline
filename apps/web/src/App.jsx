@@ -79,6 +79,9 @@ function App() {
         {activeTab === 'predictions' && <PredictionsTab />}
         {activeTab === 'alerts' && <PriceAlertsTab />}
       </main>
+      <footer style={{ marginTop: '24px', color: '#fbbf24', textAlign: 'center', fontSize: '13px' }}>
+        Research and paper use only — not investment advice. No automated trade execution.
+      </footer>
     </div>
   );
 }

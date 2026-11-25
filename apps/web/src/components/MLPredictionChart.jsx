@@ -6,10 +6,8 @@ import {
 const MLPredictionChart = ({ data }) => {
   if (!data || data.length === 0) return null;
 
-  // Combine actual, predicted, and confidence intervals
   const formattedData = data.map(d => ({
-    date: d.prediction_date,
-    actual: d.actual_close,
+    date: d.target_date || d.prediction_date,
     predicted: d.predicted_close,
     conf_lower: d.confidence_lower,
     conf_upper: d.confidence_upper,
@@ -27,7 +25,7 @@ const MLPredictionChart = ({ data }) => {
 
   return (
     <div className="glass-card" style={{ width: '100%', height: '350px' }}>
-      <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600 }}>ML Prediction vs Actual</h3>
+      <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600 }}>Validated model predictions</h3>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -51,17 +49,6 @@ const MLPredictionChart = ({ data }) => {
               isAnimationActive={false}
             />
           )}
-          
-          {/* Actual Price */}
-          <Line 
-            type="monotone" 
-            dataKey="actual" 
-            stroke="#10b981" 
-            strokeWidth={2} 
-            dot={false} 
-            name="Actual Price" 
-            isAnimationActive={false} 
-          />
           
           {/* Predicted Price */}
           <Line 

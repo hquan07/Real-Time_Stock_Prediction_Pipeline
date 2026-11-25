@@ -1,5 +1,8 @@
 x-airflow-common: &airflow-common
-  image: apache/airflow:2.9.3-python3.10
+  build:
+    context: .
+    dockerfile: infrastructure/docker/airflow/Dockerfile
+  image: stock-pipeline-airflow:${IMAGE_TAG:-dev}
   environment: &airflow-env
     AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
     AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW__CORE__LOAD_EXAMPLES}
@@ -10,15 +13,15 @@ x-airflow-common: &airflow-common
     _AIRFLOW_WWW_USER_CREATE: 'true'
     _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER}
     _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD}
-    _PIP_ADDITIONAL_REQUIREMENTS: "yfinance>=0.2.0 pandas>=2.0.0 loguru>=0.7.0 requests==2.32.3"
+    PYTHONPATH: /opt/airflow/packages/pipeline/src:/opt/airflow
+    PIPELINE_ENV: ${PIPELINE_ENV:-dev}
   volumes:
-    - ./dags:/opt/airflow/dags
+    - ./orchestration/airflow/dags:/opt/airflow/dags:ro
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
-    - ./src:/opt/airflow/src
-    - ./scripts:/opt/airflow/scripts
-    - ./integrations:/opt/airflow/integrations:ro
-    - ./src/machine_learning/artifacts:/opt/airflow/src/machine_learning/artifacts
+    - ./packages/pipeline/src:/opt/airflow/packages/pipeline/src:ro
+    - ./scripts:/opt/airflow/scripts:ro
+    - ./artifacts:/opt/airflow/artifacts
   depends_on:
     postgres:
       condition: service_healthy
@@ -35,7 +38,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -77,7 +80,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
     command: webserver
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
@@ -117,7 +120,7 @@ services:
       CLOUDVAULT_MAX_TEST_MAE: ${CLOUDVAULT_MAX_TEST_MAE:-}
       CLOUDVAULT_REPORT_PUBLISH_ENABLED: ${CLOUDVAULT_REPORT_PUBLISH_ENABLED:-false}
       CLOUDVAULT_REPORT_RETENTION_CLASS: ${CLOUDVAULT_REPORT_RETENTION_CLASS:-report}
-      CLOUDVAULT_REPORT_EXPORT_DIR: ${CLOUDVAULT_REPORT_EXPORT_DIR:-/opt/airflow/src/machine_learning/artifacts/reports}
+      CLOUDVAULT_REPORT_EXPORT_DIR: ${CLOUDVAULT_REPORT_EXPORT_DIR:-/opt/airflow/artifacts/model-reports}
     networks:
       - default
       - cloudvault-shared
@@ -131,7 +134,7 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT}
     ports:
-      - "2181:2181"
+      - "127.0.0.1:2181:2181"
     restart: always
 
   kafka:
@@ -153,7 +156,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     ports:
-      - "9092:9092"
+      - "127.0.0.1:9092:9092"
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
@@ -169,38 +172,88 @@ services:
   # ---------------------------
   spark-master:
     build:
-      context: ./docker/spark
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: infrastructure/docker/spark/Dockerfile
     container_name: spark-master
     environment:
       SPARK_MASTER_HOST: ${SPARK_MASTER_HOST}
     ports:
-      - "7077:7077"
-      - "8080:8080"
+      - "127.0.0.1:7077:7077"
+      - "127.0.0.1:8080:8080"
     command: [ "/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master" ]
     volumes:
       - ./data:/opt/data
       - ./models:/opt/models
       - ./src:/opt/app/src
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8080/"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
     restart: always
 
   spark-worker:
     build:
-      context: ./docker/spark
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: infrastructure/docker/spark/Dockerfile
     container_name: spark-worker
     depends_on:
-      - spark-master
+      spark-master:
+        condition: service_healthy
     environment:
       SPARK_MASTER: spark://spark-master:7077
     ports:
-      - "8082:8081"
+      - "127.0.0.1:8082:8081"
     command: [ "/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077" ]
     volumes:
       - ./data:/opt/data
       - ./models:/opt/models
       - ./src:/opt/app/src
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8081/"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
     restart: always
+
+  spark-consumer:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/spark/Dockerfile
+    container_name: spark-consumer
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-stock_raw_data}
+      SPARK_CHECKPOINT_LOCATION: /opt/spark/checkpoints/stock-consumer
+      PYTHONPATH: /opt/app/packages/pipeline/src
+    command:
+      - /opt/spark/bin/spark-submit
+      - --master
+      - local[2]
+      - --packages
+      - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.apache.spark:spark-avro_2.12:3.5.3,org.postgresql:postgresql:42.6.0
+      - /opt/app/packages/pipeline/src/stock_pipeline/streaming/jobs/spark_consumer_job.py
+    volumes:
+      - ./packages/pipeline/src:/opt/app/packages/pipeline/src:ro
+      - spark_checkpoints:/opt/spark/checkpoints
+      - spark_ivy:/home/spark/.ivy2
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[s]park_consumer_job.py' >/dev/null && test -f /opt/spark/checkpoints/stock-consumer/metadata"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    restart: unless-stopped
 
   # ---------------------------
   # JUPYTER NOTEBOOK FOR ML + DL
@@ -211,7 +264,7 @@ services:
     environment:
       JUPYTER_TOKEN: ${JUPYTER_TOKEN}
     ports:
-      - "${JUPYTER_PORT}:8888"
+      - "127.0.0.1:${JUPYTER_PORT}:8888"
     volumes:
       - ./notebooks:/home/jovyan/notebooks
       - ./data:/home/jovyan/data
@@ -225,7 +278,7 @@ services:
     image: ghcr.io/mlflow/mlflow:v2.10.2
     container_name: mlflow
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       - MLFLOW_BACKEND_STORE_URI=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
@@ -235,6 +288,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
     restart: always
 
   # ---------------------------
@@ -244,22 +302,28 @@ services:
     image: redis:7-alpine
     container_name: redis_cache
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     restart: always
 
   # ---------------------------
   # Dashboard Backend (FastAPI)
   # ---------------------------
   dashboard-backend:
+    image: stock-api:${IMAGE_TAG:-dev}
     build:
       context: .
-      dockerfile: docker/app/Dockerfile
+      dockerfile: infrastructure/docker/app/Dockerfile
     container_name: dashboard-backend
     restart: always
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
@@ -270,16 +334,20 @@ services:
       - REDIS_PORT=6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS:-http://localhost,http://localhost:5173}
+      - MODEL_REPORT_DIR=/app/artifacts/model-reports
+      - PIPELINE_ENV=${PIPELINE_ENV:-dev}
     volumes:
       - ./src:/app/src
+      - ./packages/pipeline/src:/app/packages/pipeline/src:ro
       - ./services/api:/app/services/api
+      - ./artifacts:/app/artifacts:ro
     depends_on:
       postgres:
         condition: service_healthy
       kafka:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
       interval: 15s
@@ -290,13 +358,14 @@ services:
   # Dashboard Frontend (Vite/React)
   # ---------------------------
   dashboard-frontend:
+    image: stock-web:${IMAGE_TAG:-dev}
     build:
       context: .
-      dockerfile: docker/frontend/Dockerfile
+      dockerfile: infrastructure/docker/frontend/Dockerfile
     container_name: dashboard-frontend
     restart: always
     ports:
-      - "${DASHBOARD_PORT:-5173}:8080"
+      - "127.0.0.1:${DASHBOARD_PORT:-5173}:8080"
     depends_on:
       dashboard-backend:
         condition: service_healthy
@@ -316,6 +385,8 @@ volumes:
   redis_data:
   kafka_data:
   mlflow_data:
+  spark_checkpoints:
+  spark_ivy:
 
 networks:
   cloudvault-shared:

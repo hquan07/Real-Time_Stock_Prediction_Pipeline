@@ -12,7 +12,12 @@ def test_transform_raw_data_local():
 
     data = [{
         "ticker": "AAPL",
-        "timestamp": 1700000000,
+        "timestamp": 1700000000000,
+        "event_id": "b" * 64,
+        "schema_version": 2,
+        "source": "test",
+        "interval": "1d",
+        "exchange_timezone": "America/New_York",
         "price": {
             "open": 100.0,
             "high": 105.0,

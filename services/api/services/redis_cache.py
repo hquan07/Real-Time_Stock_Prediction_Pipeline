@@ -1,7 +1,7 @@
 import json
 import redis.asyncio as redis
 from loguru import logger
-from config.settings import RedisSettings
+from stock_pipeline.config.settings import RedisSettings
 
 settings = RedisSettings.from_env()
 

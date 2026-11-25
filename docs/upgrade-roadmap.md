@@ -40,6 +40,11 @@ Thời lượng là ước tính cho một nhóm 1–2 kỹ sư làm bán thời
 
 Chi tiết thực thi và các điều kiện còn chặn P0 được ghi tại [preflight README](preflight/README.md).
 
+**Trạng thái 2026-11-25:** phần P0 thuộc phạm vi repository đã hoàn tất và có
+bằng chứng tại [P0 implementation status](p0-implementation-status.md). Chưa
+được merge/push để phát hành cho đến khi owner hoàn tất xoay credential, kiểm
+tra thu hồi và phê duyệt xử lý lịch sử Git theo runbook preflight.
+
 ### Quy ước branch theo pha
 
 Mỗi pha được triển khai trên một branch riêng, tạo từ `main` hoặc branch của pha trước sau khi gate được phê duyệt. Tên branch dùng mẫu `upr/p<phase>-<muc-tieu-ngan>`; chỉ merge khi toàn bộ tiêu chí nghiệm thu của pha đó đạt. Không dùng branch pha mới để sửa trực tiếp công việc của pha trước.

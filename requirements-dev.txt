@@ -1,6 +1,12 @@
--r requirements-ml.txt
-pytest==8.3.1
-pytest-cov==4.1.0
-pytest-mock==3.14.0
-pytest-timeout==2.3.1
-apache-airflow==2.9.3
+-r requirements-base.txt
+-c constraints-python.txt
+pytest
+pytest-cov
+pytest-mock
+pytest-timeout
+pre-commit
+ruff
+mypy
+check-jsonschema
+pip-audit
+detect-secrets

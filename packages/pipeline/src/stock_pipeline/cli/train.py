@@ -1,0 +1,298 @@
+"""
+Airflow script to run model training pipeline.
+Called by train_model_dag.py
+"""
+
+import os
+from pathlib import Path
+from datetime import datetime
+
+from loguru import logger
+import pandas as pd
+
+
+def run_train(
+    model_type: str = "random_forest",
+    ticker: str = None,
+    lookback_days: int = 365,
+    save_model: bool = True,
+) -> dict:
+    """
+    Run the model training pipeline.
+
+    Args:
+        model_type: Type of model to train ('random_forest', 'lstm')
+        ticker: Specific ticker to train on (None = all data)
+        lookback_days: Days of historical data to use
+        save_model: Whether to save trained model
+
+    Returns:
+        Dict with training stats and metrics.
+    """
+    import pandas as pd
+    import numpy as np
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.metrics import mean_squared_error, mean_absolute_error
+    import pickle
+
+    from stock_pipeline.ml.preprocessing.preprocess import (
+        preprocess_for_training,
+        DataScaler,
+    )
+    from stock_pipeline.ml.feature_engineering.features import build_features
+
+    start_time = datetime.now()
+    stats = {
+        "model_type": model_type,
+        "ticker": ticker,
+        "start_time": start_time.isoformat(),
+    }
+
+    logger.info(f"🚀 Starting {model_type} training")
+
+    try:
+        if model_type != "random_forest":
+            raise ValueError(
+                "Only random_forest is eligible in P0; LSTM validation is not implemented"
+            )
+        # Training is allowed only on validated database data.
+        df = load_training_data(ticker, lookback_days)
+
+        if df.empty:
+            raise ValueError("No validated database data available; training aborted")
+
+        required_columns = {"ticker", "date", "open", "high", "low", "close", "volume"}
+        missing_columns = required_columns - set(df.columns)
+        if missing_columns:
+            raise ValueError(f"Training data missing columns: {sorted(missing_columns)}")
+        if len(df) < 60:
+            raise ValueError("At least 60 validated observations are required for training")
+
+        logger.info(f"Loaded {len(df)} training samples")
+
+        # Ensure numeric columns are float
+        numeric_cols = ["open", "high", "low", "close", "volume"]
+        for c in numeric_cols:
+            if c in df.columns:
+                df[c] = pd.to_numeric(df[c], errors='coerce').astype(float)
+
+        # Feature engineering
+        df = build_features(df, is_training=True)
+        logger.info(f"Features built, {len(df)} samples after cleaning")
+
+        # Preprocess with next-day return as target
+        result = preprocess_for_training(
+            df,
+            target_column="target_return",
+            train_ratio=0.8,
+            save_scaler=False,  # We will save it via ModelRegistry
+        )
+
+        X_train = result["X_train"]
+        X_test = result["X_test"]
+        y_train = result["y_train"]
+        y_test = result["y_test"]
+        scaler = result["scaler"]
+        feature_names = result["feature_names"]
+
+        logger.info(f"Train/Test shapes: {X_train.shape} / {X_test.shape}")
+
+        # Train model
+        if model_type == "random_forest":
+            model = RandomForestRegressor(
+                n_estimators=200,
+                max_depth=10,
+                random_state=42,
+                n_jobs=-1,
+            )
+            model.fit(X_train, y_train)
+
+            # Predictions
+            train_pred = model.predict(X_train)
+            test_pred = model.predict(X_test)
+
+            # Save Feature Importance
+            try:
+                import json
+                importances = model.feature_importances_
+                # Pair with feature names and sort
+                feat_imp = sorted(zip(feature_names, importances), key=lambda x: x[1], reverse=True)
+
+                # We'll save the top 15 features to a JSON file
+                feat_imp_list = [{"feature": k, "importance": float(v)} for k, v in feat_imp[:15]]
+
+                model_dir = Path(os.getenv("MODEL_REPORT_DIR", "artifacts/model-reports"))
+                model_dir.mkdir(parents=True, exist_ok=True)
+                feat_file = model_dir / f"feature_importance_{ticker if ticker else 'ALL'}.json"
+                with feat_file.open("w") as f:
+                    json.dump(feat_imp_list, f)
+                logger.info(f"✅ Saved feature importance to {feat_file}")
+            except Exception as e:
+                logger.error(f"Failed to save feature importance: {e}")
+
+        # Calculate metrics
+        train_rmse = np.sqrt(mean_squared_error(y_train, train_pred))
+        test_rmse = np.sqrt(mean_squared_error(y_test, test_pred))
+        test_mae = mean_absolute_error(y_test, test_pred)
+
+        metrics = {
+            "train_rmse": float(train_rmse),
+            "test_rmse": float(test_rmse),
+            "test_mae": float(test_mae),
+        }
+        stats["metrics"] = metrics
+
+        from stock_pipeline.ml.training.evaluation import (
+            evaluate_against_zero_return_baseline,
+            walk_forward_evaluate,
+            write_evaluation_report,
+        )
+
+        holdout_evaluation = evaluate_against_zero_return_baseline(y_test, test_pred)
+        walk_forward = walk_forward_evaluate(
+            np.vstack([X_train, X_test]),
+            np.concatenate([y_train, y_test]),
+            lambda: RandomForestRegressor(
+                n_estimators=100, max_depth=10, random_state=42, n_jobs=-1
+            ),
+            n_splits=5,
+        )
+        evaluation = {"holdout": holdout_evaluation, "walk_forward": walk_forward}
+        stats["evaluation"] = evaluation
+        stats["promotion_eligible"] = bool(
+            holdout_evaluation["beats_baseline"] and walk_forward["beats_baseline"]
+        )
+
+        report_dir = os.getenv(
+            "EVALUATION_REPORT_DIR", "artifacts/model-reports"
+        )
+        report_path = os.path.join(
+            report_dir,
+            f"{model_type}_{ticker or 'ALL'}_{start_time.strftime('%Y%m%dT%H%M%SZ')}.json",
+        )
+        write_evaluation_report(evaluation, Path(report_path))
+        stats["evaluation_report"] = report_path
+
+        logger.info(f"Metrics - Train RMSE: {train_rmse:.4f}, Test RMSE: {test_rmse:.4f}")
+
+        # Save model using Model Registry
+        if save_model and stats["promotion_eligible"]:
+            from stock_pipeline.ml.model_registry import ModelRegistry
+
+            try:
+                import mlflow
+                import mlflow.sklearn
+                # Ensure MLflow backend store URI uses Docker network host or env variable
+                mlflow_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
+                mlflow.set_tracking_uri(mlflow_uri)
+                mlflow.set_experiment("RealTime_Stock_Prediction_DAG")
+
+                with mlflow.start_run():
+                    mlflow.log_param("model_type", model_type)
+                    mlflow.log_param("ticker", ticker)
+                    mlflow.log_param("lookback_days", lookback_days)
+                    mlflow.log_metrics(metrics)
+
+                    if model_type == "random_forest":
+                        mlflow.sklearn.log_model(model, "model")
+
+                    logger.info("✅ Logged run to MLflow")
+            except ImportError:
+                logger.warning("MLflow not installed in Airflow worker, skipping MLflow tracking")
+            except Exception as e:
+                logger.warning(f"MLflow tracking failed: {e}")
+
+            # For Random Forest, we save the scikit-learn model
+            version = ModelRegistry.save_model(
+                model=model,
+                scaler=scaler,
+                features=feature_names,
+                metrics=metrics,
+                model_type=model_type
+            )
+
+            stats["model_version"] = version
+        elif save_model:
+            logger.warning("Model did not beat the baseline; registry promotion blocked")
+
+        stats["status"] = "success"
+
+    except Exception as e:
+        logger.error(f"Training failed: {e}")
+        stats["status"] = "failed"
+        stats["error"] = str(e)
+
+    end_time = datetime.now()
+    stats["end_time"] = end_time.isoformat()
+    stats["duration_seconds"] = (end_time - start_time).total_seconds()
+
+    return stats
+
+
+def load_training_data(ticker: str = None, days: int = 365) -> pd.DataFrame:
+    """Load training data from database."""
+    import pandas as pd
+
+    try:
+        from sqlalchemy import text
+        from stock_pipeline.db.db_connection import get_session
+
+        query = """
+            SELECT ticker, event_date as date, open, high, low, close, volume
+            FROM stock_prices_stream
+            WHERE event_date >= NOW() - (:days * INTERVAL '1 day')
+        """
+
+        if ticker:
+            query += " AND ticker = :ticker"
+
+        query += " ORDER BY event_date"
+
+        with get_session() as session:
+            result = session.execute(
+                text(query),
+                {"days": days, "ticker": ticker}
+            )
+            rows = result.fetchall()
+
+        if rows:
+            df = pd.DataFrame(rows, columns=["ticker", "date", "open", "high", "low", "close", "volume"])
+            return df
+        else:
+            return pd.DataFrame()
+
+    except Exception as e:
+        logger.error(f"Could not load from database: {e}")
+        return pd.DataFrame()
+
+
+def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run model training pipeline")
+    parser.add_argument(
+        "--model",
+        choices=["random_forest", "lstm"],
+        default="random_forest",
+        help="Model type to train",
+    )
+    parser.add_argument("--ticker", help="Specific ticker to train on")
+    parser.add_argument("--days", type=int, default=365, help="Days of data to use")
+    parser.add_argument("--no-save", action="store_true", help="Don't save model")
+
+    args = parser.parse_args()
+
+    result = run_train(
+        model_type=args.model,
+        ticker=args.ticker,
+        lookback_days=args.days,
+        save_model=not args.no_save,
+    )
+
+    print(f"Result: {result}")
+    if result.get("status") != "success" or not result.get("promotion_eligible", False):
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

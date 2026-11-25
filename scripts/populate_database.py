@@ -7,13 +7,13 @@ Fetches comprehensive stock data from yfinance and populates all database tables
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "packages/pipeline/src"))
 
 import yfinance as yf
 import psycopg2
 from datetime import datetime, timedelta
 from loguru import logger
-from config.settings import DatabaseSettings
+from stock_pipeline.config.settings import DatabaseSettings
 
 DB_SETTINGS = DatabaseSettings.from_env()
 

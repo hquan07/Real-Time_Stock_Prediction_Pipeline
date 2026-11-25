@@ -10,14 +10,15 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+PACKAGE_ROOT = PROJECT_ROOT / "packages/pipeline/src"
+if str(PACKAGE_ROOT) not in sys.path:
+    sys.path.insert(0, str(PACKAGE_ROOT))
 
-from integrations.cloudvault import CloudVaultClient, CloudVaultConfig
-from integrations.model_restore import activate_local_version, restore_model_bundle
+from stock_pipeline.integrations.cloudvault import CloudVaultClient, CloudVaultConfig
+from stock_pipeline.integrations.model_restore import activate_local_version, restore_model_bundle
 
 
-DEFAULT_REGISTRY_DIR = PROJECT_ROOT / "src/machine_learning/artifacts/registry"
+DEFAULT_REGISTRY_DIR = PROJECT_ROOT / "artifacts/model-registry"
 
 
 def parse_args() -> argparse.Namespace:

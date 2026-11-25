@@ -6,9 +6,23 @@ repos:
         entry: scripts/ci/check_secrets.sh
         language: system
         pass_filenames: false
+      - id: detect-secrets
+        name: detect secrets
+        entry: detect-secrets-hook --exclude-lines 'replace-with-|test-only-|your_.*_here'
+        language: system
+      - id: ruff-check
+        name: Ruff correctness
+        entry: ruff check --select E9,F63,F7,F82
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: Ruff format
+        entry: ruff format --check
+        language: system
+        types: [python]
       - id: python-compile
         name: Python syntax check
-        entry: python3 -m compileall -q src services scripts tests
+        entry: python3 -m compileall -q packages/pipeline/src src services scripts tests
         language: system
         pass_filenames: false
       - id: frontend-lint
@@ -16,3 +30,20 @@ repos:
         entry: npm --prefix apps/web run lint
         language: system
         pass_filenames: false
+      - id: structured-file-validation
+        name: YAML and JSON validation
+        entry: python3 scripts/ci/validate_structured_files.py
+        language: system
+        pass_filenames: false
+      - id: mypy-core
+        name: mypy core settings and contract
+        entry: mypy --ignore-missing-imports packages/pipeline/src/stock_pipeline/config/settings.py packages/pipeline/src/stock_pipeline/ingestion/schema/contract.py
+        language: system
+        pass_filenames: false
+        stages: [manual]
+      - id: dependency-audit
+        name: Python dependency audit
+        entry: pip-audit -r requirements-base.txt
+        language: system
+        pass_filenames: false
+        stages: [manual]

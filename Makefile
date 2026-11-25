@@ -14,7 +14,7 @@ frontend-install:
 
 lint: compose-config
 	./scripts/ci/check_secrets.sh
-	$(PYTHON) -m compileall -q src services scripts tests
+	$(PYTHON) -m compileall -q packages/pipeline/src src services scripts tests
 	npm --prefix apps/web run lint
 
 test-unit:

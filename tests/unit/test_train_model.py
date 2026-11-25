@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from unittest.mock import patch, MagicMock
 import os
+import importlib.util
 
 
 class TestGetModel:
@@ -65,7 +66,19 @@ class TestTrainAndEvaluate:
 
         assert isinstance(result, dict)
         assert "linear" in result
-        assert "random_forest" in result
+
+    def test_walk_forward_report_includes_baseline(self, sample_price_data):
+        from sklearn.linear_model import LinearRegression
+        from src.machine_learning.training.evaluation import walk_forward_evaluate
+
+        X = sample_price_data[["open", "high", "low", "volume"]].values
+        y = sample_price_data["close"].pct_change().fillna(0).values
+        report = walk_forward_evaluate(X, y, LinearRegression, n_splits=3)
+
+        assert report["method"] == "expanding_walk_forward"
+        assert report["baseline_name"] == "zero_return"
+        assert len(report["folds"]) == 3
+        assert report["uncertainty_validated"] is False
 
     def test_train_has_metrics(self, sample_price_data):
         """Test that results contain metrics."""
@@ -94,7 +107,7 @@ class TestTrainAndEvaluate:
         assert "linear" in result
 
     @pytest.mark.skipif(
-        not pytest.importorskip("xgboost", reason="XGBoost not installed"),
+        importlib.util.find_spec("xgboost") is None,
         reason="XGBoost not installed"
     )
     def test_train_with_xgboost(self, sample_price_data):
@@ -169,7 +182,7 @@ class TestCompareModels:
 class TestAirflowTrainScript:
     """Tests for Airflow training script."""
 
-    @patch("scripts.run_train.load_training_data")
+    @patch("stock_pipeline.cli.train.load_training_data")
     def test_run_train_with_sample_data(self, mock_load, sample_price_data):
         """Test training with sample data."""
         import sys
@@ -184,6 +197,16 @@ class TestAirflowTrainScript:
 
         assert result["status"] in ["success", "failed"]
         assert "duration_seconds" in result
+
+    @patch("stock_pipeline.cli.train.load_training_data")
+    def test_run_train_fails_closed_without_validated_data(self, mock_load):
+        from scripts.run_train import run_train
+
+        mock_load.return_value = pd.DataFrame()
+        result = run_train(model_type="random_forest", save_model=False)
+
+        assert result["status"] == "failed"
+        assert "validated database data" in result["error"]
 
 
 class TestFeaturePipeline:
