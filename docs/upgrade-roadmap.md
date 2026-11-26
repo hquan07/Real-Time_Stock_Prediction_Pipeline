@@ -40,10 +40,12 @@ Thời lượng là ước tính cho một nhóm 1–2 kỹ sư làm bán thời
 
 Chi tiết thực thi và các điều kiện còn chặn P0 được ghi tại [preflight README](preflight/README.md).
 
-**Trạng thái 2026-11-25:** phần P0 thuộc phạm vi repository đã hoàn tất và có
-bằng chứng tại [P0 implementation status](p0-implementation-status.md). Chưa
-được merge/push để phát hành cho đến khi owner hoàn tất xoay credential, kiểm
-tra thu hồi và phê duyệt xử lý lịch sử Git theo runbook preflight.
+**Trạng thái 2026-11-26:** phần P0 thuộc phạm vi repository đã hoàn tất và có
+bằng chứng tại [P0 implementation status](p0-implementation-status.md). Owner
+xác nhận đã thu hồi Finnhub/CloudVault credential cũ; mật khẩu PostgreSQL cũ
+đã bị từ chối qua kết nối ứng dụng. Owner chọn giữ lịch sử Git hiện tại sau
+khi thu hồi, và nhánh P0 được đưa lên remote để review. Pilot vẫn phải qua
+gate của các pha tiếp theo.
 
 ### Quy ước branch theo pha
 

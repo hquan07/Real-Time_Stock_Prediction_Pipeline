@@ -1,6 +1,6 @@
 # P0 implementation status
 
-Updated: 2026-11-25
+Updated: 2026-11-26
 Branch: `upr/p0-foundation`
 
 ## Outcome
@@ -10,8 +10,8 @@ has one canonical Python package, versioned migrations, explicit data and model
 correctness gates, a truthful dashboard contract, pinned runtime boundaries and
 CI coverage for the release-critical paths.
 
-P0 is **not approved for remote merge or pilot release** until the external
-credential-rotation and Git-history-remediation gate below is signed off.
+The P0 branch is ready for remote review. This does not approve a pilot release;
+later-phase controls and remote CI still require review.
 
 ## Completed scope
 
@@ -69,17 +69,24 @@ Evidence captured on 2026-11-25:
 - Core local services were healthy after the drill: PostgreSQL, Kafka, Spark
   consumer, dashboard API and dashboard frontend.
 
-## External release blocker
+## Credential and history decision
 
-Before pushing or merging this branch, an authorized operator must:
+On 2026-11-26, the owner reported that the old Finnhub key and CloudVault token
+were revoked at their providers. This is owner attestation; provider-side
+revocation was not independently verified by the repository checks.
 
-1. rotate every credential identified by the preflight inventory at its source;
-2. verify the revoked values no longer authenticate;
-3. approve and coordinate the documented Git-history rewrite if the remote
-   history still contains those values;
-4. run a fresh secret scan on the rewritten clone and obtain reviewer sign-off.
+The ignored local `.env` now has a new Finnhub key and no CloudVault token.
+PostgreSQL password, Airflow connection/admin password and Jupyter token were
+rotated locally. The old PostgreSQL password was rejected over the application
+network, the new password was accepted, API/Spark restarted with the new value,
+and the dashboard smoke test passed. Airflow user metadata was absent and
+Jupyter was not running during rotation, so no active user/session for those
+services was available to verify.
 
-Cleaning the current tree does not revoke an exposed credential. See
+The owner chose to retain existing Git history after revocation. The old `.env`
+remains in public historical commits, while the current tree no longer tracks
+it. History removal would require a separate coordinated rewrite with
+collaborators and potentially GitHub support. See
 [`preflight/secret-remediation-runbook.md`](preflight/secret-remediation-runbook.md).
 
 ## Post-P0 boundary
