@@ -1,0 +1,47 @@
+name: stock-pipeline-pilot
+
+services:
+  dashboard-backend:
+    image: ${CONTAINER_REGISTRY:?set CONTAINER_REGISTRY}/stock-api:${IMAGE_TAG:?set IMAGE_TAG to a Git SHA}
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      PIPELINE_ENV: pilot
+      POSTGRES_HOST: ${POSTGRES_HOST:?set POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST:?set REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:?set KAFKA_BOOTSTRAP_SERVERS}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:?set CORS_ALLOW_ORIGINS}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  dashboard-frontend:
+    image: ${CONTAINER_REGISTRY:?set CONTAINER_REGISTRY}/stock-web:${IMAGE_TAG:?set IMAGE_TAG to a Git SHA}
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    ports:
+      - "127.0.0.1:${DASHBOARD_PORT:-5173}:8080"
+    depends_on:
+      dashboard-backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+# Pilot intentionally contains no bind mounts or mutable build context. Images
+# must be published with an immutable Git SHA after CI gates pass.

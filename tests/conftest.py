@@ -12,12 +12,24 @@ import pytest
 import pandas as pd
 import numpy as np
 
-# Unset SPARK_HOME so pyspark uses its bundled spark
-os.environ.pop("SPARK_HOME", None)
+# Safe test-only defaults; real environment values still take precedence.
+os.environ.setdefault("POSTGRES_HOST", "localhost")
+os.environ.setdefault("POSTGRES_PORT", "5432")
+os.environ.setdefault("POSTGRES_DB", "stockdb_test")
+os.environ.setdefault("POSTGRES_USER", "postgres")
+os.environ.setdefault("POSTGRES_PASSWORD", "test-only-placeholder")
+os.environ.setdefault("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+
+# Keep a valid Spark distribution inside the project image. Remove stale host
+# values so a pip-installed PySpark can still locate its bundled runtime.
+spark_home = os.environ.get("SPARK_HOME")
+if spark_home and not os.path.exists(os.path.join(spark_home, "bin", "spark-submit")):
+    os.environ.pop("SPARK_HOME", None)
 
 # Add both the repository root (for integrations/scripts) and src package path.
 REPOSITORY_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, REPOSITORY_ROOT)
+sys.path.insert(0, os.path.join(REPOSITORY_ROOT, "packages", "pipeline", "src"))
 sys.path.insert(0, os.path.join(REPOSITORY_ROOT, "src"))
 
 
@@ -64,6 +76,11 @@ def sample_kafka_message() -> dict:
     return {
         "ticker": "AAPL",
         "timestamp": int(datetime.now().timestamp() * 1000),
+        "event_id": "a" * 64,
+        "schema_version": 2,
+        "source": "test",
+        "interval": "1d",
+        "exchange_timezone": "America/New_York",
         "price": {
             "open": 150.0,
             "high": 155.0,

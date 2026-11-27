@@ -19,3 +19,13 @@ def test_compute_rsi():
     prices_alt = pd.Series([10, 11, 10, 11, 10, 11, 10, 11, 10, 11, 10, 11, 10, 11, 10])
     rsi_alt = compute_rsi(prices_alt, window=14)
     assert np.isclose(rsi_alt.iloc[-1], 50.0)
+
+
+def test_signal_source_has_no_dummy_confidence_or_rsi():
+    from pathlib import Path
+
+    source = Path("packages/pipeline/src/stock_pipeline/cli/signals.py").read_text()
+    assert "current_rsi = 50" not in source
+    assert "100 - (ci_width * 1000)" not in source
+    assert 'signal_type = "BUY"' not in source
+    assert 'signal_type = "SELL"' not in source

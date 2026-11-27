@@ -11,6 +11,7 @@ from dash import Input, Output, State, callback, html
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 from loguru import logger
+from config.settings import DatabaseSettings
 
 # Add src and project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -39,13 +40,7 @@ COLORS = {
 }
 
 # DB Config
-DB_CONFIG = {
-    "host": os.getenv("POSTGRES_HOST", "localhost"),
-    "port": int(os.getenv("POSTGRES_PORT", 5433)),
-    "database": os.getenv("POSTGRES_DB", "stockdb"),
-    "user": os.getenv("POSTGRES_USER", "postgres"),
-    "password": os.getenv("POSTGRES_PASSWORD", "Huyquan1607")
-}
+DB_CONFIG = DatabaseSettings.from_env().connect_kwargs()
 
 ARTIFACTS_DIR = os.path.join(os.path.dirname(__file__), "..", "machine_learning", "artifacts")
 DL_ARTIFACTS_DIR = os.path.join(os.path.dirname(__file__), "..", "deep_learning", "artifacts")

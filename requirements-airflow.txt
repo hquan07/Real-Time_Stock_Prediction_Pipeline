@@ -1,6 +1,6 @@
--r requirements-base.txt
-apache-airflow
-apache-airflow-providers-postgres
-apache-airflow-providers-apache-spark
-apache-airflow-providers-apache-kafka
-apache-airflow-providers-docker
+--constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.9.3/constraints-3.10.txt
+apache-airflow==2.9.3
+yfinance==0.2.66
+pandas==2.2.2
+loguru==0.7.3
+requests==2.32.3

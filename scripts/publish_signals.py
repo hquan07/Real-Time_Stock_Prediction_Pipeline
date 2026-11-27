@@ -11,16 +11,17 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+PACKAGE_ROOT = PROJECT_ROOT / "packages/pipeline/src"
+if str(PACKAGE_ROOT) not in sys.path:
+    sys.path.insert(0, str(PACKAGE_ROOT))
 
-from integrations.cloudvault import CloudVaultClient, CloudVaultConfig
-from integrations.model_artifacts import ModelBundleValidationError, latest_registry_version
-from integrations.report_artifacts import build_signal_report, publish_signal_report
+from stock_pipeline.integrations.cloudvault import CloudVaultClient, CloudVaultConfig
+from stock_pipeline.integrations.model_artifacts import ModelBundleValidationError, latest_registry_version
+from stock_pipeline.integrations.report_artifacts import build_signal_report, publish_signal_report
 
 
-DEFAULT_REGISTRY_DIR = PROJECT_ROOT / "src/machine_learning/artifacts/registry"
-DEFAULT_REPORT_DIR = PROJECT_ROOT / "src/machine_learning/artifacts/reports"
+DEFAULT_REGISTRY_DIR = PROJECT_ROOT / "artifacts/model-registry"
+DEFAULT_REPORT_DIR = PROJECT_ROOT / "artifacts/model-reports"
 
 
 def _enabled() -> bool:
@@ -44,7 +45,7 @@ def parse_args() -> argparse.Namespace:
 def _load_committed_signals(logical_date: str) -> list[dict]:
     from sqlalchemy import text
 
-    from src.database.db_connection import get_engine
+    from stock_pipeline.db.db_connection import get_engine
 
     start = date.fromisoformat(logical_date)
     end = start + timedelta(days=1)

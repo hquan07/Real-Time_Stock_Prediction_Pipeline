@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/dist
+backups
+data
+models
+artifacts
+logs
+packages/pipeline/src/stock_pipeline/deep_learning/artifacts
+packages/pipeline/src/stock_pipeline/ml/artifacts
+notebooks/.ipynb_checkpoints

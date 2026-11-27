@@ -118,3 +118,25 @@ class TestBuildFeatures:
         # Should have fewer rows due to rolling/lag NaN removal
         assert len(result) < len(sample_price_data)
         assert len(result) > 0
+
+    def test_features_and_target_do_not_cross_tickers(self, sample_price_data):
+        from src.machine_learning.feature_engineering.features import build_features
+
+        aapl = sample_price_data.copy()
+        msft = sample_price_data.copy()
+        msft["ticker"] = "MSFT"
+        msft["close"] = msft["close"] * 10
+        mixed = pd.concat([aapl, msft]).sample(frac=1, random_state=7)
+
+        result = build_features(mixed, is_training=True)
+
+        for ticker, group in result.groupby("ticker"):
+            source = aapl if ticker == "AAPL" else msft
+            expected_first_lag = source.sort_values("date")["close"].iloc[9]
+            assert group.iloc[0]["close_lag_1"] == expected_first_lag
+            assert group.iloc[-1]["target_return"] == pytest.approx(
+                np.log(
+                    source.sort_values("date")["close"].iloc[-1]
+                    / source.sort_values("date")["close"].iloc[-2]
+                )
+            )

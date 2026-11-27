@@ -3,24 +3,25 @@
 Complete Database Populator - All Tables (Fixed Schema)
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "packages/pipeline/src"))
+
 import yfinance as yf
 import psycopg2
 from datetime import datetime
 from loguru import logger
 import pandas as pd
+from stock_pipeline.config.settings import DatabaseSettings
 
-# PostgreSQL config  
-DB_HOST = "localhost"
-DB_PORT = 5433
-DB_NAME = "stockdb"
-DB_USER = "postgres"
-DB_PASSWORD = "Huyquan1607"
+DB_SETTINGS = DatabaseSettings.from_env()
 
 TICKERS = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'V', 'WMT']
 
 
 def get_db_connection():
-    return psycopg2.connect(host=DB_HOST, port=DB_PORT, database=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+    return psycopg2.connect(**DB_SETTINGS.connect_kwargs())
 
 
 def safe_float(value):

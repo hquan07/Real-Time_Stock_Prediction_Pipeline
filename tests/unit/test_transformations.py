@@ -7,7 +7,12 @@ def test_transform_schema():
 
     data = [{
         "ticker": "MSFT",
-        "timestamp": 1700000000,
+        "timestamp": 1700000000000,
+        "event_id": "a" * 64,
+        "schema_version": 2,
+        "source": "test",
+        "interval": "1d",
+        "exchange_timezone": "America/New_York",
         "price": {
             "open": 200,
             "high": 210,

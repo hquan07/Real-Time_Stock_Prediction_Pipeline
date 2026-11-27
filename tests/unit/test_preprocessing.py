@@ -145,3 +145,22 @@ class TestCreateSequences:
         # First sequence should be [0,1,2,3,4], target should be 5
         np.testing.assert_array_equal(X[0].flatten(), [0, 1, 2, 3, 4])
         assert y[0] == 5
+
+
+def test_preprocess_scaler_is_fit_on_train_only(sample_price_data):
+    from src.machine_learning.preprocessing.preprocess import preprocess_for_training
+
+    frame = sample_price_data.copy()
+    frame["target_return"] = frame["close"].pct_change().shift(-1)
+    frame.loc[80:, "open"] = frame.loc[80:, "open"] + 10_000
+
+    result = preprocess_for_training(
+        frame,
+        target_column="target_return",
+        feature_columns=["open", "high", "low", "close", "volume"],
+        save_scaler=False,
+    )
+
+    assert result["X_train"][:, 0].max() < 5
+    assert result["X_test"][:, 0].mean() > 100
+    assert np.max(np.abs(result["y_train"])) < 1
