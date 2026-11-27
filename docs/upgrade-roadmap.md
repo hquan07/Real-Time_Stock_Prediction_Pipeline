@@ -47,6 +47,11 @@ xác nhận đã thu hồi Finnhub/CloudVault credential cũ; mật khẩu Postg
 khi thu hồi, và nhánh P0 được đưa lên remote để review. Pilot vẫn phải qua
 gate của các pha tiếp theo.
 
+**P1 bắt đầu 2026-11-27:** owner chọn phạm vi EOD research với YFinance.
+Contract, quality run, Bronze/Silver/Gold, Kafka raw/validated/DLQ và cách
+vận hành được ghi tại [P1 data contract](p1-data-contract.md) trên branch
+`upr/p1-data-contract`. Gate P1 cần CI branch pass trước khi merge.
+
 ### Quy ước branch theo pha
 
 Mỗi pha được triển khai trên một branch riêng, tạo từ `main` hoặc branch của pha trước sau khi gate được phê duyệt. Tên branch dùng mẫu `upr/p<phase>-<muc-tieu-ngan>`; chỉ merge khi toàn bộ tiêu chí nghiệm thu của pha đó đạt. Không dùng branch pha mới để sửa trực tiếp công việc của pha trước.

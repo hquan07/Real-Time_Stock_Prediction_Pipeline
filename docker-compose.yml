@@ -167,6 +167,64 @@ services:
       start_period: 20s
     restart: always
 
+  schema-registry:
+    profiles: ["p1"]
+    image: confluentinc/cp-schema-registry:7.6.0
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8081/subjects >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  market-price-topics:
+    profiles: ["p1"]
+    image: confluentinc/cp-kafka:7.6.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-euc"]
+    command:
+      - |
+        for topic in market_price_raw market_price_validated market_price_dlq; do
+          if [ "$$topic" = market_price_dlq ]; then retention=2592000000; else retention=604800000; fi
+          kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists \
+            --topic "$$topic" --partitions 3 --replication-factor 1 \
+            --config "retention.ms=$$retention"
+        done
+    restart: "no"
+
+  market-price-worker:
+    profiles: ["p1"]
+    build:
+      context: .
+      dockerfile: infrastructure/docker/market-price/Dockerfile
+    image: stock-market-price:${IMAGE_TAG:-dev}
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      market-price-topics:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   # ---------------------------
   # SPARK (MASTER + WORKER)
   # ---------------------------

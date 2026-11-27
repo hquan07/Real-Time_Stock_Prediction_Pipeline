@@ -55,7 +55,7 @@ def run_train(
             raise ValueError(
                 "Only random_forest is eligible in P0; LSTM validation is not implemented"
             )
-        # Training is allowed only on validated database data.
+        # P1 training consumes only quality-gated Gold bars.
         df = load_training_data(ticker, lookback_days)
 
         if df.empty:
@@ -238,15 +238,19 @@ def load_training_data(ticker: str = None, days: int = 365) -> pd.DataFrame:
         from stock_pipeline.db.db_connection import get_session
 
         query = """
-            SELECT ticker, event_date as date, open, high, low, close, volume
-            FROM stock_prices_stream
-            WHERE event_date >= NOW() - (:days * INTERVAL '1 day')
+            SELECT g.symbol AS ticker,
+                   (g.event_time_utc AT TIME ZONE 'America/New_York')::date AS date,
+                   g.open, g.high, g.low, g.close, g.volume
+            FROM public.market_price_gold_bars g
+            JOIN public.data_quality_runs q ON q.run_id = g.quality_run_id
+            WHERE g.source = 'yfinance' AND q.status = 'passed'
+              AND g.event_time_utc >= NOW() - (:days * INTERVAL '1 day')
         """
 
         if ticker:
-            query += " AND ticker = :ticker"
+            query += " AND g.symbol = :ticker"
 
-        query += " ORDER BY event_date"
+        query += " ORDER BY g.symbol, g.event_time_utc"
 
         with get_session() as session:
             result = session.execute(

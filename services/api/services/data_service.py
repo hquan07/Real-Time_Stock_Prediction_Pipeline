@@ -1,5 +1,5 @@
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from loguru import logger
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
@@ -39,20 +39,38 @@ async def fetch_stock_data(pool, ticker: str, period: str = "3mo") -> pd.DataFra
     try:
         period_days = {"1W": 7, "1M": 30, "3M": 90, "6M": 180, "1Y": 365, "1y": 365, "3mo": 90}
         days = period_days.get(period, 90)
-        start_date = datetime.now() - timedelta(days=days)
+        start_date = datetime.now(timezone.utc) - timedelta(days=days)
         
         if not pool:
             return pd.DataFrame()
             
-        query = """
-            SELECT event_date as date, event_time, open, high, low, close, volume,
-                   source, interval, exchange_timezone, schema_version
-            FROM stock_prices_stream
+        gold_query = """
+            SELECT (g.event_time_utc AT TIME ZONE 'America/New_York')::date AS date,
+                   g.event_time_utc AS event_time, g.open, g.high, g.low,
+                   g.close, g.volume, g.source, g.interval,
+                   'America/New_York'::text AS exchange_timezone,
+                   1 AS schema_version, s.ingested_at_utc AS ingested_at,
+                   g.as_of_time AS available_at, 'gold'::text AS data_tier
+            FROM public.market_price_gold_bars g
+            JOIN public.market_price_silver s USING (event_id)
+            WHERE g.symbol = $1 AND g.source = 'yfinance'
+              AND g.event_time_utc >= $2
+            ORDER BY g.event_time_utc ASC
+        """
+        legacy_query = """
+            SELECT event_date AS date, event_time, open, high, low, close, volume,
+                   source, interval, exchange_timezone, schema_version,
+                   NULL::timestamptz AS ingested_at,
+                   NULL::timestamptz AS available_at,
+                   'legacy'::text AS data_tier
+            FROM public.stock_prices_stream
             WHERE ticker = $1 AND event_date >= $2
             ORDER BY event_time ASC
         """
         async with pool.acquire() as conn:
-            records = await conn.fetch(query, ticker, start_date.date())
+            records = await conn.fetch(gold_query, ticker, start_date)
+            if not records:
+                records = await conn.fetch(legacy_query, ticker, start_date.date())
             
         if records:
             df = pd.DataFrame([dict(r) for r in records])
