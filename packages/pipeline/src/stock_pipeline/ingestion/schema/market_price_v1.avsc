@@ -1,0 +1,22 @@
+{
+  "type": "record",
+  "name": "MarketPriceV1",
+  "namespace": "com.stock.market",
+  "doc": "US equity OHLCV bar; timestamps are UTC Unix milliseconds. Corporate actions and fundamentals use separate contracts.",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "symbol", "type": "string"},
+    {"name": "event_time_utc", "type": "long"},
+    {"name": "ingested_at_utc", "type": "long"},
+    {"name": "open", "type": "double"},
+    {"name": "high", "type": "double"},
+    {"name": "low", "type": "double"},
+    {"name": "close", "type": "double"},
+    {"name": "volume", "type": "long"},
+    {"name": "source", "type": "string"},
+    {"name": "interval", "type": "string"},
+    {"name": "exchange_timezone", "type": "string", "default": "America/New_York"},
+    {"name": "schema_version", "type": "int", "default": 1},
+    {"name": "quality_flags", "type": {"type": "array", "items": "string"}, "default": []}
+  ]
+}
