@@ -22,12 +22,15 @@ def compute_rsi(data: pd.Series, window: int = 14) -> pd.Series:
 def fetch_latest_features(ticker: str, engine) -> dict:
     try:
         from sqlalchemy import text
-        # Read enough validated observations to calculate RSI from real prices.
+        # Only completed quality-gated Gold bars may feed a research signal.
         query = text("""
-            SELECT ticker, event_time as date, open, high, low, close, volume
-            FROM stock_prices_stream
-            WHERE ticker = :ticker
-            ORDER BY event_time DESC
+            SELECT g.symbol AS ticker, g.event_time_utc AS date,
+                   g.open, g.high, g.low, g.close, g.volume
+            FROM public.market_price_gold_bars g
+            JOIN public.data_quality_runs q ON q.run_id = g.quality_run_id
+            WHERE g.symbol = :ticker AND g.source = 'yfinance'
+              AND q.status = 'passed'
+            ORDER BY g.event_time_utc DESC
             LIMIT 40
         """)
 

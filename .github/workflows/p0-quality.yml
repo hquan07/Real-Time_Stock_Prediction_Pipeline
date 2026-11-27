@@ -46,6 +46,7 @@ jobs:
         run: |
           pip-audit -r requirements-base.txt
           pip-audit -r services/api/requirements.txt
+          pip-audit -r requirements-market-price.txt
 
   migrations:
     runs-on: ubuntu-latest
@@ -68,7 +69,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install psycopg2-binary==2.9.11
+      - run: >-
+          python -m pip install -c constraints-python.txt
+          psycopg2-binary fastavro requests exchange-calendars pandas
       - name: Apply, roll back, and reapply migrations
         env:
           PYTHONPATH: packages/pipeline/src
@@ -81,6 +84,15 @@ jobs:
           python scripts/migrate.py up
           python scripts/migrate.py down
           python scripts/migrate.py up
+      - name: Verify P1 contract storage and replay
+        env:
+          PYTHONPATH: packages/pipeline/src
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: stockdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-placeholder
+        run: python scripts/ci/p1_ci_drill.py
 
   spark-runtime:
     runs-on: ubuntu-latest
@@ -125,6 +137,7 @@ jobs:
         run: |
           docker build --tag stock-api:${{ github.sha }} --file infrastructure/docker/app/Dockerfile .
           docker build --tag stock-web:${{ github.sha }} --file infrastructure/docker/frontend/Dockerfile .
+          docker build --tag stock-market-price:${{ github.sha }} --file infrastructure/docker/market-price/Dockerfile .
       - name: Verify API image excludes build tooling
         run: >-
           docker run --rm stock-api:${{ github.sha }} python -c
@@ -143,6 +156,14 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: stock-web:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+      - name: Scan P1 market-price image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: stock-market-price:${{ github.sha }}
           format: table
           exit-code: "1"
           severity: CRITICAL,HIGH

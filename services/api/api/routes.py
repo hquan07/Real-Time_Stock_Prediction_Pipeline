@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query, Request
 from loguru import logger
 import pandas as pd
+from stock_pipeline.ingestion.market_price.freshness import eod_is_stale
 
 from services.data_service import fetch_stock_data
 from services.redis_cache import get_cached_data, set_cached_data
@@ -82,7 +83,7 @@ async def get_stock_data(
     if not pool:
         raise HTTPException(status_code=503, detail="Database unavailable")
     ticker = ticker.upper()
-    cache_key = f"api:stock:v2:{ticker}:{period}"
+    cache_key = f"api:stock:v3:{ticker}:{period}"
     cached = await get_cached_data(cache_key)
     if cached:
         return cached
@@ -99,26 +100,40 @@ async def get_stock_data(
         latest = frame.iloc[-1]
         as_of = _as_utc(latest["event_time"])
         interval = latest.get("interval") or "1d"
-        stale_after_seconds = 36 * 3600 if interval == "1d" else 15 * 60
-        age_seconds = max(
-            0, (datetime.now(timezone.utc) - as_of.to_pydatetime()).total_seconds()
-        )
+        now = datetime.now(timezone.utc)
+        age_seconds = max(0, (now - as_of.to_pydatetime()).total_seconds())
+        if interval == "1d":
+            try:
+                stale = eod_is_stale(as_of.to_pydatetime(), now=now)
+            except (ValueError, OverflowError) as exc:
+                logger.warning(f"Could not calculate EOD freshness: {exc}")
+                stale = None
+        else:
+            stale = age_seconds > 15 * 60
+        ingested_at = latest.get("ingested_at")
+        available_at = latest.get("available_at")
         meta = _base_meta(
             source=latest.get("source"),
             as_of=as_of.isoformat(),
             exchange_timezone=latest.get("exchange_timezone") or "America/New_York",
             market_status=_market_status(),
-            stale=age_seconds > stale_after_seconds,
+            stale=stale,
             age_seconds=int(age_seconds),
             interval=interval,
             schema_version=int(latest.get("schema_version") or 0),
+            ingested_at=_as_utc(ingested_at).isoformat() if pd.notna(ingested_at) else None,
+            available_at=_as_utc(available_at).isoformat() if pd.notna(available_at) else None,
+            data_tier=latest.get("data_tier"),
+            research_only=True,
             period=period,
         )
         serializable = frame.copy()
-        for column in ("date", "event_time"):
+        for column in ("date", "event_time", "ingested_at", "available_at"):
             if column in serializable:
-                serializable[column] = serializable[column].astype(str)
-        serializable = serializable.where(pd.notna(serializable), None)
+                serializable[column] = serializable[column].map(
+                    lambda value: value.isoformat() if pd.notna(value) else None
+                )
+        serializable = serializable.astype(object).where(pd.notna(serializable), None)
         result = {"data": serializable.to_dict(orient="records"), "state": "ready", "meta": meta}
         await set_cached_data(cache_key, result, expire=300)
         return result
